@@ -62,7 +62,7 @@ function createContainer() {
 
   const authRepository: AuthRepository = new AuthRepositoryImpl(apiClient, tokenStore);
   const caseRepository: CaseRepository = new CaseRepositoryImpl(local, remote);
-  const commentRepository: CommentRepository = new CommentRepositoryImpl(local);
+  const commentRepository: CommentRepository = new CommentRepositoryImpl(local, remote);
   const catalogRepository: CatalogRepository = new CatalogRepositoryImpl(local, remote);
   const syncEngine = new SyncEngine(local, remote);
 

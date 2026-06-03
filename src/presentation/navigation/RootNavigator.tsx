@@ -6,6 +6,7 @@ import { env } from '@/core/config/env';
 import { InactivityTimer } from '@/data/security';
 import { colors } from '@/design-system';
 import { PlaceholderScreen } from '@/presentation/components';
+import { CaseDetailContainer } from '@/presentation/screens/case-detail';
 import { LoginContainer } from '@/presentation/screens/login';
 import { useAuthStore } from '@/presentation/stores';
 
@@ -14,7 +15,6 @@ import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const CaseDetailPlaceholder = () => <PlaceholderScreen title="Detalle del caso" />;
 const NewCasePlaceholder = () => <PlaceholderScreen title="Nuevo caso" />;
 
 /** Envuelve la sesión autenticada y reinicia el temporizador de inactividad al tocar. */
@@ -64,7 +64,7 @@ export function RootNavigator() {
     <InactivityGate>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={AppTabs} />
-        <Stack.Screen name="CaseDetail" component={CaseDetailPlaceholder} />
+        <Stack.Screen name="CaseDetail" component={CaseDetailContainer} />
         <Stack.Screen
           name="NewCase"
           component={NewCasePlaceholder}

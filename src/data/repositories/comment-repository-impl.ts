@@ -10,6 +10,7 @@ import {
 } from '@/domain';
 
 import type { LocalDataSource } from '../datasources/local';
+import type { RemoteDataSource } from '../datasources/remote';
 import type { PendingOperation } from '../sync';
 
 /**
@@ -19,6 +20,7 @@ import type { PendingOperation } from '../sync';
 export class CommentRepositoryImpl implements CommentRepository {
   constructor(
     private readonly local: LocalDataSource,
+    private readonly remote: RemoteDataSource,
     private readonly now: () => number = Date.now,
     private readonly idGen: () => string = uuid,
   ) {}
@@ -69,6 +71,20 @@ export class CommentRepositoryImpl implements CommentRepository {
       return ok(comment);
     } catch (e) {
       return err(unknownError('No se pudo agregar el comentario', e));
+    }
+  }
+
+  async refresh(caseId: string): Promise<Result<void, DomainError>> {
+    try {
+      const parent = await this.local.getCaseById(caseId);
+      if (!parent || parent.serverId == null) return ok(undefined); // creado offline: nada que traer
+      const comments = await this.remote.fetchComments(parent.serverId, caseId);
+      await this.local.upsertComments(comments);
+      return ok(undefined);
+    } catch (e) {
+      // Tolerante a falta de red: se muestran los comentarios locales.
+      if (e instanceof DomainError && e.kind === 'network') return ok(undefined);
+      return err(e instanceof DomainError ? e : unknownError('Fallo al refrescar comentarios', e));
     }
   }
 }

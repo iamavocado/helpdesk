@@ -19,7 +19,7 @@ function setup() {
   const idGen = () => `id-${++counter}`;
   const clock = () => 1_000_000;
   const caseRepo = new CaseRepositoryImpl(local, remote, clock, idGen);
-  const commentRepo = new CommentRepositoryImpl(local, clock, idGen);
+  const commentRepo = new CommentRepositoryImpl(local, remote, clock, idGen);
   const sync = new SyncEngine(local, remote, () => 0.5);
   return { local, caseRepo, commentRepo, sync };
 }

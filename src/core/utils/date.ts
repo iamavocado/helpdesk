@@ -1,3 +1,32 @@
+const MONTHS_ES = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+];
+
+const pad = (n: number): string => n.toString().padStart(2, '0');
+
+/** Fecha y hora legible: "27 may 2026, 09:14". */
+export function formatDateTime(epoch: number): string {
+  const d = new Date(epoch);
+  return `${d.getDate()} ${MONTHS_ES[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Hora corta: "09:14". */
+export function formatTime(epoch: number): string {
+  const d = new Date(epoch);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 /** Tiempo relativo en español (aprox.) para listas de casos. */
 export function timeAgo(epoch: number, now: number = Date.now()): string {
   const diff = Math.max(0, now - epoch);

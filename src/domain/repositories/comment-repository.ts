@@ -9,4 +9,7 @@ export interface CommentRepository {
 
   /** Agrega un comentario (persiste local + encola para sync). */
   add(input: NewCommentInput): Promise<Result<Comment, DomainError>>;
+
+  /** Sincroniza desde el servidor los comentarios del caso (tolerante a falta de red). */
+  refresh(caseId: string): Promise<Result<void, DomainError>>;
 }

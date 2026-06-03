@@ -25,14 +25,18 @@
     "@nozbe/watermelondb": "^0.27.1",
     "expo": "~51.0.39",
     "expo-constants": "~16.0.2",
+    "expo-crypto": "~13.0.2",
     "expo-font": "~12.0.10",
     "expo-localization": "~15.0.3",
+    "expo-secure-store": "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "i18next": "^23.11.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-i18next": "^14.1.2",
-    "react-native": "0.74.5"
+    "react-native": "0.74.5",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

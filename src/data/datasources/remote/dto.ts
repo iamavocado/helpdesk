@@ -90,6 +90,23 @@ export interface PriorityDto extends CatalogItemDto {
   HoursToClose: number | null;
 }
 
+export interface LoginRequestDto {
+  username: string;
+  password: string;
+}
+
+export interface AuthUserDto {
+  username: string;
+  name: string;
+  email: string;
+}
+
+export interface AuthTokensDto {
+  accessToken: string;
+  refreshToken: string;
+  user: AuthUserDto;
+}
+
 export interface CatalogsDto {
   equipmentTypes: CatalogItemDto[];
   modules: CatalogItemDto[];

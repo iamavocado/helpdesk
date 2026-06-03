@@ -1,9 +1,11 @@
 import type {
+  AuthTokensDto,
   CaseDto,
   CatalogsDto,
   CommentDto,
   CreateCaseDto,
   CreateCommentDto,
+  LoginRequestDto,
 } from '@/data/datasources/remote/dto';
 import { generateSeed, type SeedData } from '@/mock';
 
@@ -40,6 +42,41 @@ export class MockApiClient implements ApiClient {
 
   private async delay(): Promise<void> {
     if (this.latencyMs > 0) await new Promise((r) => setTimeout(r, this.latencyMs));
+  }
+
+  // --- Autenticación (demo) ---
+
+  private issueTokens(username: string): AuthTokensDto {
+    // Token pseudo-JWT (no real): payload base64 con expiración a 15 min.
+    const payload = { sub: username, exp: Date.now() + 15 * 60_000 };
+    const token = `mock.${encodeURIComponent(JSON.stringify(payload))}.sig`;
+    return {
+      accessToken: token,
+      refreshToken: `refresh.${username}.${Date.now()}`,
+      user: { username, name: this.displayName(username), email: `${username}@ita-sa.com` },
+    };
+  }
+
+  private displayName(username: string): string {
+    return username.charAt(0).toUpperCase() + username.slice(1);
+  }
+
+  async login(body: LoginRequestDto): Promise<AuthTokensDto> {
+    await this.delay();
+    // Credencial demo: cualquier usuario no vacío con contraseña 'dozzier'.
+    if (!body.username.trim() || body.password !== 'dozzier') {
+      throw new ApiError(401, 'Credenciales inválidas');
+    }
+    return this.issueTokens(body.username.trim());
+  }
+
+  async refresh(refreshToken: string): Promise<AuthTokensDto> {
+    await this.delay();
+    const username = refreshToken.split('.')[1];
+    if (!refreshToken.startsWith('refresh.') || !username) {
+      throw new ApiError(401, 'Refresh token inválido');
+    }
+    return this.issueTokens(username);
   }
 
   async getCases(params: GetCasesParams): Promise<PagedDto<CaseDto>> {

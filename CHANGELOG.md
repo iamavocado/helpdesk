@@ -6,6 +6,18 @@ y el proyecto adopta [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Fase 4 — Autenticación y seguridad
+
+- Autenticación JWT: `ApiClient.login`/`refresh` (impl. en `MockApiClient` con credenciales demo y en `HttpApiClient`).
+- Almacenamiento seguro de la sesión: `TokenStore` (interfaz) + `SecureTokenStore` (Keychain/Keystore vía `expo-secure-store`) + `InMemoryTokenStore` (tests).
+- Interceptor HTTP `withAuthRetry`: adjunta Bearer y maneja 401 → refresh → reintento (anti-bucle), cableado en `HttpApiClient`.
+- `AuthRepository` + `AuthRepositoryImpl` + casos de uso `LoginUseCase`/`LogoutUseCase`.
+- Pantalla de login (`LoginScreen`) con validación (zod) sobre el design system.
+- Store de sesión (Zustand) y composition root (`core/di`) que cablea secure store, API (mock/HTTP) y repositorios.
+- Llave de cifrado de BD generada con CSPRNG y guardada en almacenamiento seguro (`getOrCreateDbEncryptionKey`), para SQLCipher en el build nativo.
+- Logout por inactividad (`InactivityTimer`, configurable por `.env`).
+- HTTPS forzado: ATS sin excepciones (iOS). 18 tests nuevos de seguridad (interceptor, token store, timer, repo, login, validación).
+
 ### Fase 3 — Capa de datos
 
 - Capa de dominio: entidades (`Case`, `Comment`, `Catalogs`), value objects (clasificación de estados, `SyncStatus`, `Result`) e interfaces de repositorio (puertos).

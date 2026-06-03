@@ -6,6 +6,14 @@ y el proyecto adopta [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Fase 5 — Pantallas principales (en progreso)
+
+- Navegación con React Navigation: stack raíz + pestañas inferiores con FAB central (`CustomTabBar`), gate de sesión (Login vs app) y restauración de sesión al arrancar.
+- Logout automático por inactividad cableado a los toques (`InactivityGate` + `InactivityTimer`).
+- Pantalla **Home** (dashboard): saludo, tarjetas de estado (3 clasificaciones + total), CTA de creación y casos recientes; pull-to-refresh; datos vía repositorio offline-first (`useHomeData`).
+- Componentes compartidos: `AppHeader`, `CaseListItem`. Pantalla de perfil con cierre de sesión.
+- Pendientes de la fase: Lista de casos, Detalle, Nuevo caso, Comentario.
+
 ### Fase 4 — Autenticación y seguridad
 
 - Autenticación JWT: `ApiClient.login`/`refresh` (impl. en `MockApiClient` con credenciales demo y en `HttpApiClient`).

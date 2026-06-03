@@ -1,13 +1,15 @@
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import './src/presentation/i18n';
-import { DesignSystemCatalog } from './src/design-system/catalog/DesignSystemCatalog';
 import { ThemeProvider, useAppFonts, colors } from './src/design-system';
+import { RootNavigator } from './src/presentation/navigation';
 
 /**
- * Fase 2: la app monta el sistema de diseño y muestra el catálogo de componentes.
- * La navegación y las pantallas reales llegan en la Fase 5; el catálogo es temporal.
+ * Raíz de la app: carga fuentes, provee tema y navegación.
+ * El gate de sesión (Login vs app) vive en RootNavigator.
  */
 export default function App() {
   const fontsLoaded = useAppFonts();
@@ -22,21 +24,18 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider>
-      <View style={styles.root}>
-        <StatusBar style="dark" />
-        <DesignSystemCatalog />
-      </View>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <NavigationContainer>
+          <StatusBar style="light" />
+          <RootNavigator />
+        </NavigationContainer>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.bg,
-    paddingTop: Platform.OS === 'android' ? 28 : 52,
-  },
   loading: {
     flex: 1,
     alignItems: 'center',

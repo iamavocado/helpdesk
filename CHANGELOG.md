@@ -6,6 +6,14 @@ y el proyecto adopta [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Fase 2 — Sistema de diseño
+
+- Design tokens extraídos 1:1 del prototipo: colores (marca, estados, superficies), tipografía (Inter Tight + Fraunces), espaciado, radios y sombras (`src/design-system/tokens/`).
+- Carga de fuentes Inter Tight y Fraunces vía `@expo-google-fonts` + `expo-font` (plugin añadido a `app.config.ts`).
+- Tema único (`theme`) con `ThemeProvider`/`useTheme` (preparado para theming dinámico).
+- Componentes atómicos: `Text`, `Button`, `Input`, `Select` (modal picker), `Badge`, `Card`, `Avatar`, `Chip` — con accesibilidad básica (roles, labels, toque ≥44pt).
+- Catálogo navegable de componentes (`DesignSystemCatalog`) montado temporalmente en `App.tsx` para revisión visual.
+
 ### Fase 1 — Andamiaje del proyecto
 
 - Inicialización del proyecto con Expo SDK 51, React Native 0.74 y TypeScript estricto.

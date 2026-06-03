@@ -20,6 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'light',
   scheme: 'dozzier',
   assetBundlePatterns: ['**/*'],
+  plugins: ['expo-font'],
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.ita.dozzier.helpdesk',

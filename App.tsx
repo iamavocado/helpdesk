@@ -1,42 +1,46 @@
 import { StatusBar } from 'expo-status-bar';
-import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 
 import './src/presentation/i18n';
+import { DesignSystemCatalog } from './src/design-system/catalog/DesignSystemCatalog';
+import { ThemeProvider, useAppFonts, colors } from './src/design-system';
 
 /**
- * Andamiaje Fase 1: la app compila y arranca vacía.
- * La navegación, el sistema de diseño y las pantallas llegan en fases posteriores.
+ * Fase 2: la app monta el sistema de diseño y muestra el catálogo de componentes.
+ * La navegación y las pantallas reales llegan en la Fase 5; el catálogo es temporal.
  */
 export default function App() {
-  const { t } = useTranslation();
+  const fontsLoaded = useAppFonts();
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loading}>
+        <StatusBar style="light" />
+        <ActivityIndicator color={colors.brandTeal} />
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <Text style={styles.brand}>{t('app.name')}</Text>
-      <Text style={styles.tagline}>{t('app.tagline')}</Text>
-    </View>
+    <ThemeProvider>
+      <View style={styles.root}>
+        <StatusBar style="dark" />
+        <DesignSystemCatalog />
+      </View>
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    paddingTop: Platform.OS === 'android' ? 28 : 52,
+  },
+  loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1e2a3a',
-  },
-  brand: {
-    color: '#ffffff',
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: 2,
-  },
-  tagline: {
-    color: '#3eb5a7',
-    fontSize: 13,
-    marginTop: 6,
-    letterSpacing: 1,
+    backgroundColor: colors.brandDark,
   },
 });

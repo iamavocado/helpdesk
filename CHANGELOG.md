@@ -6,6 +6,19 @@ y el proyecto adopta [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Fase 3 — Capa de datos
+
+- Capa de dominio: entidades (`Case`, `Comment`, `Catalogs`), value objects (clasificación de estados, `SyncStatus`, `Result`) e interfaces de repositorio (puertos).
+- DTOs del servidor (reflejan `BPMHelpDesk`) + mappers DTO ↔ dominio.
+- `LocalDataSource` (interfaz) + `InMemoryLocalDataSource` (implementación de trabajo/tests con upsert por `serverId`).
+- Esquema WatermelonDB + migraciones (`schemaVersion 1`) como artefacto del DBA; su activación con SQLCipher queda para el build nativo.
+- Cola de operaciones pendientes con backoff exponencial y `SyncEngine` que drena respetando dependencias (caso → comentario).
+- Repositorios offline-first (`CaseRepositoryImpl`, `CommentRepositoryImpl`, `CatalogRepositoryImpl`): lectura local, escritura encolada, refresh tolerante a falta de red.
+- Capa de servicios `ApiClient` desacoplada con `MockApiClient` (en proceso, seed realista ≥50 casos) y `HttpApiClient` (esqueleto para la API real).
+- Mock con catálogos reales del `.sql` y seed determinista; documentado en `docs/MOCK_SERVER.md`.
+- 36 tests (Jest) incl. flujo offline→online; cobertura `domain` 100% y `services` ~84%.
+- Tooling: resolver de imports TypeScript para ESLint; `eqeqeq` permite `== null`.
+
 ### Fase 2 — Sistema de diseño
 
 - Design tokens extraídos 1:1 del prototipo: colores (marca, estados, superficies), tipografía (Inter Tight + Fraunces), espaciado, radios y sombras (`src/design-system/tokens/`).

@@ -1,0 +1,99 @@
+import type { Classification, SyncStatus } from '../value-objects';
+
+/**
+ * Caso de soporte (dominio). Deriva de `Desk.Cases` (ver DATA_MODEL.md §4),
+ * en camelCase y con un subconjunto orientado a las pantallas de la app.
+ * `id` es UUID local; `serverId` es el entero IDENTITY del servidor (null si no sincronizado).
+ */
+export interface Case {
+  id: string;
+  serverId: number | null;
+
+  // Solicitante / reporte
+  userRequester: string;
+  requesterEmail: string | null;
+  reportingUser: string | null;
+  reportingUserEmail: string | null;
+
+  // Fechas (epoch ms)
+  creationDate: number;
+  modificationDate: number;
+  solutionDate: number | null;
+
+  // Estado
+  classificationId: number;
+  classification: Classification;
+  statusCaseId: number;
+  statusCaseDesc: string;
+  subStatusId: number | null;
+
+  // Clasificación / categoría
+  equipmentTypeId: number;
+  equipmentTypeDesc: string;
+  softwareModuleId: number | null;
+  softwareModuleDesc: string | null;
+  softwareEnvironmentId: number | null;
+  softwareEnvironmentDesc: string | null;
+  hardwareEquipmentId: number | null;
+  hardwareEquipmentDesc: string | null;
+  priorityId: number | null;
+  priorityDesc: string | null;
+  serviceTypeId: number | null;
+  serviceTypeDesc: string | null;
+
+  // Contenido
+  caseDetails: string;
+  technician: string | null;
+  location: string | null;
+
+  // Ubicación / cliente
+  client: string | null;
+  countryDesc: string | null;
+  departmentDesc: string | null;
+
+  // Sincronización (solo cliente)
+  syncStatus: SyncStatus;
+}
+
+/**
+ * Datos para crear un caso desde la app (campos que el usuario aporta).
+ * El resto (fechas, estado inicial, identidad) los completa el caso de uso.
+ */
+export interface NewCaseInput {
+  equipmentTypeId: number;
+  equipmentTypeDesc: string;
+  softwareModuleId?: number | null;
+  softwareModuleDesc?: string | null;
+  softwareEnvironmentId?: number | null;
+  softwareEnvironmentDesc?: string | null;
+  hardwareEquipmentId?: number | null;
+  hardwareEquipmentDesc?: string | null;
+  serviceTypeId?: number | null;
+  serviceTypeDesc?: string | null;
+  priorityId?: number | null;
+  priorityDesc?: string | null;
+  caseDetails: string;
+  client?: string | null;
+  reportingUser?: string | null;
+  reportingUserEmail?: string | null;
+  location?: string | null;
+}
+
+/**
+ * Título derivado para listas (la BD no tiene "asunto"):
+ * Categoría + (Módulo | Equipo | Tipo de servicio). Ver DATA_MODEL.md §7.
+ */
+export function caseTitle(
+  c: Pick<
+    Case,
+    'equipmentTypeDesc' | 'softwareModuleDesc' | 'hardwareEquipmentDesc' | 'serviceTypeDesc'
+  >,
+): string {
+  const secondary = c.softwareModuleDesc ?? c.hardwareEquipmentDesc ?? c.serviceTypeDesc ?? null;
+  return secondary ? `${c.equipmentTypeDesc} · ${secondary}` : c.equipmentTypeDesc;
+}
+
+/** Identificador legible: entero del servidor o marcador offline. */
+export function caseDisplayId(c: Pick<Case, 'serverId'>): string {
+  return c.serverId != null ? `Caso #${c.serverId}` : 'Caso (pendiente de número)';
+}

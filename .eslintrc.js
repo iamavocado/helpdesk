@@ -6,6 +6,12 @@ module.exports = {
     project: './tsconfig.json',
   },
   plugins: ['@typescript-eslint', 'prettier'],
+  settings: {
+    'import/resolver': {
+      typescript: { project: './tsconfig.json' },
+      node: true,
+    },
+  },
   ignorePatterns: [
     'node_modules/',
     'dist/',
@@ -22,6 +28,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     // No loguear datos sensibles: console.warn/error permitidos; log/debug no (ver SECURITY.md §9)
     'no-console': ['warn', { allow: ['warn', 'error'] }],
-    eqeqeq: ['error', 'always'],
+    eqeqeq: ['error', 'always', { null: 'ignore' }],
   },
 };

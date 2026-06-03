@@ -16,6 +16,18 @@ module.exports = {
     'src/presentation/screens/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/index.ts',
+    // Archivos solo-interfaz/tipos (sin lógica ejecutable):
+    '!src/domain/repositories/**',
+    '!src/domain/entities/catalog.ts',
+    '!src/domain/value-objects/sync-status.ts',
+    '!src/services/api/api-client.ts',
+    '!src/data/datasources/local/local-data-source.ts',
+    '!src/data/datasources/remote/dto.ts',
+    '!src/data/sync/pending-operation.ts',
+    // Esqueleto que se implementa/prueba al cablear la API real (Fase 4):
+    '!src/services/api/http-api-client.ts',
+    // Esquema WatermelonDB: se activa con el build nativo (Fase posterior):
+    '!src/data/datasources/local/watermelon/**',
   ],
   coverageDirectory: 'coverage',
   coverageThreshold: {

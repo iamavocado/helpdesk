@@ -1,0 +1,44 @@
+# Dependencias
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Builds nativos
+/ios
+/android
+*.apk
+*.aab
+*.ipa
+
+# Variables de entorno reales (solo se versiona .env.example)
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+
+# Testing / cobertura
+coverage/
+
+# Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Datos fuente (no se versionan en la app; viven fuera del repo)
+Script_Data_Estructura_BPMHelpDesk.sql

@@ -1,0 +1,41 @@
+{
+  "app": {
+    "name": "DOZZIER",
+    "tagline": "HelpDesk Móvil"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "send": "Enviar",
+    "back": "Atrás",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "search": "Buscar"
+  },
+  "status": {
+    "pendiente": "Pendiente",
+    "cola": "En Cola",
+    "cerrado": "Cerrado",
+    "resuelto": "Resuelto"
+  },
+  "nav": {
+    "home": "Inicio",
+    "cases": "Casos",
+    "search": "Buscar",
+    "profile": "Perfil"
+  },
+  "home": {
+    "greeting": "Hola, {{name}}",
+    "subtitle": "Resumen de tus casos en DOZZIER",
+    "createCase": "Crear nuevo caso",
+    "recentCases": "Casos recientes",
+    "viewAll": "Ver todos"
+  },
+  "sync": {
+    "online": "Conectado",
+    "offline": "Sin conexión",
+    "pending": "{{count}} operación pendiente",
+    "pending_other": "{{count}} operaciones pendientes",
+    "syncing": "Sincronizando…"
+  }
+}

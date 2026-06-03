@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOZZIER — HelpDesk Móvil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Paleta DOZZIER */
+    --brand-dark: #1e2a3a;        /* azul marino del logo */
+    --brand-darker: #151e2b;
+    --brand-teal: #2d9b8f;        /* verde azulado del logo */
+    --brand-teal-bright: #3eb5a7;
+    --brand-accent: #f5a623;      /* acento cálido para contraste */
+
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --ink: #1e2a3a;
+    --ink-soft: #4a5868;
+    --ink-faint: #8a95a3;
+    --line: #e3e8ee;
+
+    /* Estados oficiales */
+    --pendiente: #f0934a;
+    --pendiente-soft: #fde6d3;
+    --cola: #e53935;
+    --cola-soft: #fcdbd9;
+    --resuelto: #7cb342;
+    --resuelto-soft: #e0eed1;
+    --cerrado: #6c757d;
+    --cerrado-soft: #e0e2e5;
+
+    --shadow: 0 1px 2px rgba(30,42,58,0.04), 0 8px 24px rgba(30,42,58,0.08);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    background: #0d1420;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(45,155,143,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(62,181,167,0.08) 0%, transparent 50%);
+  }
+
+  /* Marco del teléfono */
+  .phone-frame {
+    width: 390px;
+    max-width: 100%;
+    height: 844px;
+    max-height: 95vh;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 10px solid #0a0a0a;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 0 0 2px #2a2a2a;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 28px;
+    background: #0a0a0a;
+    border-radius: 0 0 18px 18px;
+    z-index: 100;
+  }
+
+  .status-bar {
+    height: 44px;
+    padding: 14px 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: white;
+    background: var(--brand-dark);
+  }
+
+  .status-icons { display: flex; gap: 5px; align-items: center; font-size: 12px; }
+
+  /* App header con branding DOZZIER */
+  .app-header {
+    padding: 14px 22px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background: var(--brand-dark);
+    color: white;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Monograma DOZZIER (Z estilizada) */
+  .logo-mark {
+    width: 38px; height: 38px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 100%; height: 100%; }
+
+  .logo-text {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    color: white;
+  }
+
+  .header-action {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    color: white;
+  }
+
+  .header-action:active { transform: scale(0.95); }
+
+  .badge-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 8px; height: 8px;
+    background: var(--brand-teal-bright);
+    border-radius: 50%;
+    border: 2px solid var(--brand-dark);
+  }
+
+  .screens {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    padding: 22px 22px 100px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .screen::-webkit-scrollbar { display: none; }
+
+  .screen-title {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 4px;
+    color: var(--brand-dark);
+  }
+
+  .screen-title .accent {
+    color: var(--brand-teal);
+    font-style: italic;
+  }
+
+  .screen-subtitle {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 22px;
+    letter-spacing: -0.01em;
+  }
+
+  /* === DASHBOARD DE ESTADOS === */
+  .status-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .status-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .status-card:active { transform: scale(0.98); }
+
+  .status-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .status-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .status-icon.pendiente { background: var(--pendiente); }
+  .status-icon.cola { background: white; border: 3px solid var(--cola); }
+  .status-icon.resuelto { background: var(--resuelto); }
+  .status-icon.cerrado { background: var(--cerrado); }
+
+  .status-icon svg { color: white; }
+  .status-icon.cola svg { color: var(--cola); }
+
+  .status-count {
+    background: var(--pendiente-soft);
+    color: var(--pendiente);
+    padding: 4px 10px;
+    border-radius: 100px;
+    min-width: 36px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-card[data-status="cola"] .status-count { background: var(--cola-soft); color: var(--cola); }
+  .status-card[data-status="resuelto"] .status-count { background: var(--resuelto-soft); color: var(--resuelto); }
+  .status-card[data-status="cerrado"] .status-count { background: var(--cerrado-soft); color: var(--cerrado); }
+
+  .status-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .status-trend {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+
+  /* CTA con color DOZZIER teal */
+  .cta-create {
+    background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-teal-bright) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 18px;
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    letter-spacing: -0.01em;
+    box-shadow: 0 4px 14px rgba(45,155,143,0.3);
+  }
+
+  .cta-create:active { transform: scale(0.98); }
+
+  .cta-create .arrow {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-label a {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--brand-teal);
+    font-weight: 600;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* === LISTA === */
+  .case-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--line);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .case-item:active { transform: scale(0.99); background: #fafbfc; }
+
+  .case-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 16px; bottom: 16px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .case-item[data-status="pendiente"]::before { background: var(--pendiente); }
+  .case-item[data-status="cola"]::before { background: var(--cola); }
+  .case-item[data-status="resuelto"]::before { background: var(--resuelto); }
+  .case-item[data-status="cerrado"]::before { background: var(--cerrado); }
+
+  .case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .case-id {
+    font-family: 'Fraunces', serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  .case-subject {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    margin-top: 2px;
+    color: var(--ink);
+  }
+
+  .status-badge {
+    font-size: 10px;
+    padding: 4px 9px;
+    border-radius: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .status-badge.pendiente { background: var(--pendiente-soft); color: var(--pendiente); }
+  .status-badge.cola { background: var(--cola-soft); color: var(--cola); }
+  .status-badge.resuelto { background: var(--resuelto-soft); color: var(--resuelto); }
+  .status-badge.cerrado { background: var(--cerrado-soft); color: var(--cerrado); }
+
+  .case-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    align-items: center;
+  }
+
+  .meta-dot { width: 3px; height: 3px; background: var(--ink-faint); border-radius: 50%; }
+
+  /* Filtros */
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+  }
+
+  .filter-chips::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .filter-chip.active {
+    background: var(--brand-dark);
+    color: white;
+    border-color: var(--brand-dark);
+  }
+
+  .chip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .chip-dot.pendiente { background: var(--pendiente); }
+  .chip-dot.cola { background: var(--cola); }
+  .chip-dot.resuelto { background: var(--resuelto); }
+  .chip-dot.cerrado { background: var(--cerrado); }
+
+  /* Formulario */
+  .form-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+
+  .form-section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.01em;
+    color: var(--brand-dark);
+  }
+
+  .form-section-title::before {
+    content: '';
+    width: 4px; height: 16px;
+    background: var(--brand-teal);
+    border-radius: 2px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .field label .req { color: var(--brand-teal); }
+
+  .input, .select, .textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fafbfc;
+    transition: all 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--brand-teal);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(45,155,143,0.1);
+  }
+
+  .input:disabled, .input.readonly {
+    background: #f0f3f6;
+    color: var(--ink-faint);
+  }
+
+  .select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%231e2a3a' stroke-width='1.5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 36px;
+  }
+
+  .textarea { min-height: 80px; resize: vertical; }
+
+  .field-with-icon { position: relative; }
+  .field-with-icon .icon {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--brand-teal);
+  }
+
+  .checkbox-row label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .attach-btn {
+    width: 100%;
+    padding: 14px;
+    border: 1.5px dashed var(--line);
+    border-radius: 10px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .attach-btn:active { border-color: var(--brand-teal); color: var(--brand-teal); }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: -0.01em;
+  }
+
+  .btn:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+
+  .btn-primary {
+    background: var(--brand-teal);
+    color: white;
+  }
+
+  /* Detalle */
+  .detail-header {
+    background: var(--brand-dark);
+    color: white;
+    margin: -22px -22px 18px;
+    padding: 22px 22px 26px;
+    border-radius: 0 0 24px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detail-header::after {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(45,155,143,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .detail-id {
+    font-family: 'Fraunces', serif;
+    font-size: 12px;
+    color: var(--brand-teal-bright);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-meta-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .detail-meta-chip {
+    background: rgba(255,255,255,0.1);
+    padding: 5px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .detail-meta-chip.pendiente { background: var(--pendiente); color: white; }
+  .detail-meta-chip.cola { background: var(--cola); color: white; }
+  .detail-meta-chip.resuelto { background: var(--resuelto); color: white; }
+  .detail-meta-chip.cerrado { background: var(--cerrado); color: white; }
+
+  .info-grid {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 6px 16px;
+    border: 1px solid var(--line);
+    margin-bottom: 18px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-key { color: var(--ink-faint); font-weight: 500; }
+  .info-val { color: var(--ink); font-weight: 500; text-align: right; }
+
+  .comments-list { margin-bottom: 18px; }
+
+  .comment {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1px solid var(--line);
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .comment.private {
+    background: #fef9e7;
+    border-color: #f0d97a;
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .comment-author { display: flex; align-items: center; gap: 8px; }
+
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--brand-teal);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar.support { background: var(--brand-dark); }
+
+  .author-info { line-height: 1.2; }
+  .author-name { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .author-role { font-size: 10px; color: var(--ink-faint); }
+
+  .comment-time { font-size: 10px; color: var(--ink-faint); }
+
+  .comment-body {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .private-tag {
+    display: inline-block;
+    font-size: 9px;
+    background: #b8860b;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--line);
+    padding: 10px 22px 28px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 50;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--ink-faint);
+    transition: color 0.2s;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .nav-item.active { color: var(--brand-teal); }
+  .nav-item svg { width: 22px; height: 22px; }
+
+  .nav-fab {
+    width: 54px; height: 54px;
+    background: linear-gradient(135deg, var(--brand-teal) 0%, var(--brand-teal-bright) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(45,155,143,0.5);
+    margin-top: -22px;
+    transition: transform 0.2s;
+    border: 3px solid white;
+  }
+
+  .nav-fab:active { transform: scale(0.95); }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-bottom: 12px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  .toast {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--brand-dark);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen.active > * {
+    animation: slideUp 0.4s ease backwards;
+  }
+
+  .screen.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .screen.active > *:nth-child(2) { animation-delay: 0.1s; }
+  .screen.active > *:nth-child(3) { animation-delay: 0.15s; }
+  .screen.active > *:nth-child(4) { animation-delay: 0.2s; }
+  .screen.active > *:nth-child(5) { animation-delay: 0.25s; }
+
+  .nav-hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    font-family: 'Fraunces', serif;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+  }
+
+  /* Splash inicial con logo grande */
+  .splash-logo {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .splash-logo svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 12px;
+  }
+
+  .splash-logo-text {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: 0.1em;
+    color: var(--brand-dark);
+  }
+
+  .splash-logo-tagline {
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+  <div class="status-bar">
+    <span id="clock">9:41</span>
+    <div class="status-icons">
+      <span>●●●●●</span>
+      <span style="margin-left:6px;">🔋</span>
+    </div>
+  </div>
+
+  <!-- Header con logo DOZZIER -->
+  <div class="app-header">
+    <div class="logo">
+      <div class="logo-mark">
+        <!-- Monograma Z estilizado en teal -->
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fondo cuadrado redondeado -->
+          <rect x="2" y="2" width="36" height="36" rx="6" fill="none" stroke="#2d9b8f" stroke-width="2.5"/>
+          <!-- Z estilizada con dos trazos -->
+          <path d="M 10 12 L 28 12 L 12 28 L 30 28" stroke="#3eb5a7" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Trazo paralelo decorativo -->
+          <path d="M 14 16 L 26 16" stroke="#2d9b8f" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="logo-text">DOZZIER</div>
+    </div>
+    <div class="header-action" onclick="showToast('Notificaciones')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+      <span class="badge-dot"></span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Mensaje</div>
+
+  <div class="screens">
+
+    <!-- INICIO -->
+    <div class="screen active" id="screen-home">
+      <h1 class="screen-title">Hola, <span class="accent">Saulo</span></h1>
+      <p class="screen-subtitle">Resumen de tus casos en DOZZIER</p>
+
+      <div class="status-dashboard">
+
+        <div class="status-card" data-status="pendiente" onclick="goToList('pendiente')">
+          <div class="status-card-top">
+            <div class="status-icon pendiente">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <span class="status-count">185</span>
+          </div>
+          <div class="status-name">Casos Pendientes</div>
+          <div class="status-trend">↑ 12 esta semana</div>
+        </div>
+
+        <div class="status-card" data-status="cola" onclick="goToList('cola')">
+          <div class="status-card-top">
+            <div class="status-icon cola">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="9"/>
+                <polyline points="12 7 12 12 15 14"/>
+              </svg>
+            </div>
+            <span class="status-count">1</span>
+          </div>
+          <div class="status-name">Casos en Cola</div>
+          <div class="status-trend">Esperando asignación</div>
+        </div>
+
+        <div class="status-card" data-status="resuelto" onclick="goToList('resuelto')">
+          <div class="status-card-top">
+            <div class="status-icon resuelto">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span class="status-count">42</span>
+          </div>
+          <div class="status-name">Casos Resueltos</div>
+          <div class="status-trend">Este mes</div>
+        </div>
+
+        <div class="status-card" data-status="cerrado" onclick="goToList('cerrado')">
+          <div class="status-card-top">
+            <div class="status-icon cerrado">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg>
+            </div>
+            <span class="status-count">128</span>
+          </div>
+          <div class="status-name">Casos Cerrados</div>
+          <div class="status-trend">Archivados</div>
+        </div>
+
+      </div>
+
+      <button class="cta-create" onclick="goTo('screen-new')">
+        <span>Crear nuevo caso</span>
+        <span class="arrow">→</span>
+      </button>
+
+      <div class="section-label">
+        Casos recientes
+        <a onclick="goToList('todos')">Ver todos</a>
+      </div>
+
+      <div class="case-item" data-status="cola" onclick="goTo('screen-detail')">
+        <div class="case-header">
+          <div>
+            <div class="case-id">#DZ-2026-0341</div>
+            <div class="case-subject">Error al generar reporte mensual de ventas</div>
+          </div>
+          <span class="status-badge cola">En Cola</span>
+        </div>
+        <div class="case-meta">
+          <span>Software</span>
+          <span class="meta-dot"></span>
+          <span>Hace 2h</span>
+        </div>
+      </div>
+
+      <div class="case-item" data-status="pendiente" onclick="goTo('screen-detail')">
+        <div class="case-header">
+          <div>
+            <div class="case-id">#DZ-2026-0338</div>
+            <div class="case-subject">Solicitud de acceso a módulo de inventario</div>
+          </div>
+          <span class="status-badge pendiente">Pendiente</span>
+        </div>
+        <div class="case-meta">
+          <span>Software</span>
+          <span class="meta-dot"></span>
+          <span>Ayer</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="screen" id="screen-list">
+      <h1 class="screen-title" id="list-title">Mis casos</h1>
+      <p class="screen-subtitle" id="list-subtitle">Todos los casos</p>
+
+      <div class="filter-chips">
+        <button class="filter-chip active" onclick="filterList(event,'todos')">Todos</button>
+        <button class="filter-chip" onclick="filterList(event,'pendiente')"><span class="chip-dot pendiente"></span>Pendientes</button>
+        <button class="filter-chip" onclick="filterList(event,'cola')"><span class="chip-dot cola"></span>En Cola</button>
+        <button class="filter-chip" onclick="filterList(event,'resuelto')"><span class="chip-dot resuelto"></span>Resueltos</button>
+        <button class="filter-chip" onclick="filterList(event,'cerrado')"><span class="chip-dot cerrado"></span>Cerrados</button>
+      </div>
+
+      <div id="cases-list">
+        <div class="case-item" data-status="cola" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0341</div>
+              <div class="case-subject">Error al generar reporte mensual de ventas</div>
+            </div>
+            <span class="status-badge cola">En Cola</span>
+          </div>
+          <div class="case-meta">
+            <span>Software</span><span class="meta-dot"></span><span>Producción</span><span class="meta-dot"></span><span>2h</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="pendiente" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0338</div>
+              <div class="case-subject">Solicitud de acceso a módulo de inventario</div>
+            </div>
+            <span class="status-badge pendiente">Pendiente</span>
+          </div>
+          <div class="case-meta">
+            <span>Software</span><span class="meta-dot"></span><span>Ayer</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="pendiente" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0335</div>
+              <div class="case-subject">Impresora no responde en sala de audiencia 3</div>
+            </div>
+            <span class="status-badge pendiente">Pendiente</span>
+          </div>
+          <div class="case-meta">
+            <span>Hardware</span><span class="meta-dot"></span><span>Hace 2 días</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="resuelto" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0330</div>
+              <div class="case-subject">Audio intermitente en grabación de audiencia</div>
+            </div>
+            <span class="status-badge resuelto">Resuelto</span>
+          </div>
+          <div class="case-meta">
+            <span>Sala de Audiencia</span><span class="meta-dot"></span><span>3 días</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="resuelto" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0328</div>
+              <div class="case-subject">Actualización de licencia Office vencida</div>
+            </div>
+            <span class="status-badge resuelto">Resuelto</span>
+          </div>
+          <div class="case-meta">
+            <span>Software</span><span class="meta-dot"></span><span>5 días</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="cerrado" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0312</div>
+              <div class="case-subject">Cambio de contraseña de correo institucional</div>
+            </div>
+            <span class="status-badge cerrado">Cerrado</span>
+          </div>
+          <div class="case-meta">
+            <span>Software</span><span class="meta-dot"></span><span>2 semanas</span>
+          </div>
+        </div>
+
+        <div class="case-item" data-status="cerrado" onclick="goTo('screen-detail')">
+          <div class="case-header">
+            <div>
+              <div class="case-id">#DZ-2026-0298</div>
+              <div class="case-subject">Instalación de teclado en sala principal</div>
+            </div>
+            <span class="status-badge cerrado">Cerrado</span>
+          </div>
+          <div class="case-meta">
+            <span>Hardware</span><span class="meta-dot"></span><span>3 semanas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUEVO CASO -->
+    <div class="screen" id="screen-new">
+      <button class="back-btn" style="color: var(--brand-dark);" onclick="goTo('screen-home')">← Atrás</button>
+      <h1 class="screen-title">Nuevo caso</h1>
+      <p class="screen-subtitle">Completa la información del soporte</p>
+
+      <div class="form-section">
+        <div class="form-section-title">Información del solicitante</div>
+
+        <div class="field">
+          <label>Cliente <span class="req">*</span></label>
+          <select class="select" id="cliente">
+            <option value="">Seleccionar...</option>
+            <option>ITA S.A.</option>
+            <option>Cliente Demo 1</option>
+            <option>Cliente Demo 2</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Solicitante</label>
+          <input class="input readonly" value="Saulo Bravo" readonly>
+        </div>
+
+        <div class="field">
+          <label>Correo del solicitante</label>
+          <input class="input readonly" value="Sbravo@ita-sa.com" readonly>
+        </div>
+
+        <div class="field">
+          <label>Fecha de creación</label>
+          <div class="field-with-icon">
+            <input class="input readonly" value="27-Mayo-2026" readonly>
+            <span class="icon">📅</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Oficina o usuario que reporta</label>
+          <input class="input" placeholder="Ej: Oficina principal">
+        </div>
+
+        <div class="field">
+          <label>Correo del usuario final</label>
+          <input class="input" type="email" placeholder="usuario@empresa.com">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Clasificación</div>
+
+        <div class="field">
+          <label>Categoría <span class="req">*</span></label>
+          <select class="select" id="categoria" onchange="toggleCategoryFields()">
+            <option value="">Seleccionar...</option>
+            <option value="software">Software</option>
+            <option value="hardware">Hardware</option>
+            <option value="sala">Sala de Audiencia</option>
+          </select>
+        </div>
+
+        <div class="field" id="field-ambiente" style="display:none;">
+          <label>Ambiente</label>
+          <select class="select">
+            <option>Desarrollo</option>
+            <option>Pruebas</option>
+            <option>Producción</option>
+          </select>
+        </div>
+
+        <div class="field" id="field-modulo" style="display:none;">
+          <label>Módulo</label>
+          <select class="select">
+            <option value="">Seleccionar...</option>
+            <option>Ventas</option>
+            <option>Inventario</option>
+            <option>Contabilidad</option>
+            <option>RRHH</option>
+          </select>
+        </div>
+
+        <div class="field" id="field-equipo" style="display:none;">
+          <label>Equipo</label>
+          <select class="select">
+            <option value="">Seleccionar...</option>
+            <option>Computador de escritorio</option>
+            <option>Laptop</option>
+            <option>Impresora</option>
+            <option>Periférico</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Número de Referencia</label>
+          <input class="input" placeholder="Opcional">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Descripción</div>
+
+        <div class="field">
+          <label>Asunto <span class="req">*</span></label>
+          <input class="input" placeholder="Resume el problema brevemente">
+        </div>
+
+        <div class="field">
+          <label>Detalle</label>
+          <textarea class="textarea" placeholder="Describe el problema con el mayor detalle posible..."></textarea>
+        </div>
+
+        <div class="field">
+          <button class="attach-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            Adjuntar archivo
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="goTo('screen-home')">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitCase()">Enviar caso</button>
+      </div>
+    </div>
+
+    <!-- DETALLE -->
+    <div class="screen" id="screen-detail">
+
+      <div class="detail-header">
+        <button class="back-btn" onclick="goTo('screen-list')">← Atrás</button>
+        <div class="detail-id">#DZ-2026-0341</div>
+        <div class="detail-title">Error al generar reporte mensual de ventas</div>
+        <div class="detail-meta-row">
+          <span class="detail-meta-chip">Software</span>
+          <span class="detail-meta-chip">Producción</span>
+          <span class="detail-meta-chip cola">En Cola</span>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-key">Cliente</span>
+          <span class="info-val">ITA S.A.</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Módulo</span>
+          <span class="info-val">Ventas</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Creado</span>
+          <span class="info-val">27-Mayo-2026, 09:14</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Solicitante</span>
+          <span class="info-val">Saulo Bravo</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Referencia</span>
+          <span class="info-val">REF-8821</span>
+        </div>
+      </div>
+
+      <div class="section-label">Conversación</div>
+
+      <div class="comments-list">
+        <div class="comment">
+          <div class="comment-header">
+            <div class="comment-author">
+              <div class="avatar">SB</div>
+              <div class="author-info">
+                <div class="author-name">Saulo Bravo</div>
+                <div class="author-role">Solicitante</div>
+              </div>
+            </div>
+            <div class="comment-time">09:14</div>
+          </div>
+          <div class="comment-body">Al intentar generar el reporte mensual de ventas, el sistema arroja error 500. Sucede desde esta mañana en producción.</div>
+        </div>
+
+        <div class="comment">
+          <div class="comment-header">
+            <div class="comment-author">
+              <div class="avatar support">MR</div>
+              <div class="author-info">
+                <div class="author-name">María Rodríguez</div>
+                <div class="author-role">Soporte N2</div>
+              </div>
+            </div>
+            <div class="comment-time">10:32</div>
+          </div>
+          <div class="comment-body">Estamos revisando los logs del servidor. ¿Podrías indicarnos el rango de fechas que estás usando en el filtro del reporte?</div>
+        </div>
+
+        <div class="comment private">
+          <div class="comment-header">
+            <div class="comment-author">
+              <div class="avatar support">MR</div>
+              <div class="author-info">
+                <div class="author-name">María Rodríguez<span class="private-tag">Privado</span></div>
+                <div class="author-role">Soporte N2</div>
+              </div>
+            </div>
+            <div class="comment-time">10:33</div>
+          </div>
+          <div class="comment-body">@equipo: timeout en query de ventas_mensual. Posible falta de índice.</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Agregar comentario</div>
+
+        <div class="field">
+          <label>Estado del caso</label>
+          <select class="select">
+            <option>Pendiente</option>
+            <option selected>En Cola</option>
+            <option>Resuelto</option>
+            <option>Cerrado</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Descripción</label>
+          <textarea class="textarea" placeholder="Escribe tu respuesta..."></textarea>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="privado">
+          <label for="privado">Marcar como comentario privado</label>
+        </div>
+
+        <div class="field">
+          <button class="attach-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            Adjuntar archivo
+          </button>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="submitComment()">Enviar comentario</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" data-screen="screen-home" onclick="goTo('screen-home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Inicio
+    </div>
+    <div class="nav-item" data-screen="screen-list" onclick="goToList('todos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Casos
+    </div>
+    <div class="nav-fab" onclick="goTo('screen-new')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="nav-item" onclick="showToast('Buscar')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Buscar
+    </div>
+    <div class="nav-item" onclick="showToast('Perfil')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </div>
+  </div>
+</div>
+
+<div class="nav-hint">DOZZIER · Prototipo móvil</div>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('clock').textContent = h + ':' + m;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  function goTo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    document.getElementById(screenId).scrollTop = 0;
+
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navMap = { 'screen-home': 0, 'screen-list': 1, 'screen-detail': 1, 'screen-new': null };
+    const idx = navMap[screenId];
+    if (idx !== null && idx !== undefined) {
+      document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+    }
+  }
+
+  function goToList(filter) {
+    goTo('screen-list');
+    const titles = {
+      'todos': { title: 'Mis casos', subtitle: 'Todos los casos' },
+      'pendiente': { title: 'Pendientes', subtitle: '185 casos pendientes' },
+      'cola': { title: 'En Cola', subtitle: '1 caso esperando' },
+      'resuelto': { title: 'Resueltos', subtitle: '42 casos este mes' },
+      'cerrado': { title: 'Cerrados', subtitle: '128 casos archivados' }
+    };
+    document.getElementById('list-title').textContent = titles[filter].title;
+    document.getElementById('list-subtitle').textContent = titles[filter].subtitle;
+
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    const chipMap = { 'todos': 0, 'pendiente': 1, 'cola': 2, 'resuelto': 3, 'cerrado': 4 };
+    document.querySelectorAll('.filter-chip')[chipMap[filter]]?.classList.add('active');
+
+    applyFilter(filter);
+  }
+
+  function filterList(event, status) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    event.target.closest('.filter-chip').classList.add('active');
+    applyFilter(status);
+  }
+
+  function applyFilter(status) {
+    const items = document.querySelectorAll('#cases-list .case-item');
+    items.forEach(item => {
+      if (status === 'todos' || item.dataset.status === status) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function toggleCategoryFields() {
+    const cat = document.getElementById('categoria').value;
+    document.getElementById('field-ambiente').style.display = cat === 'software' ? 'block' : 'none';
+    document.getElementById('field-modulo').style.display = cat === 'software' ? 'block' : 'none';
+    document.getElementById('field-equipo').style.display = cat === 'hardware' ? 'block' : 'none';
+  }
+
+  function submitCase() {
+    showToast('✓ Caso enviado correctamente');
+    setTimeout(() => goTo('screen-home'), 800);
+  }
+
+  function submitComment() {
+    showToast('✓ Comentario agregado');
+  }
+</script>
+
+</body>
+</html>

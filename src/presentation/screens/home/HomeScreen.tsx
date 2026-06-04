@@ -1,7 +1,7 @@
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppHeader, CaseListItem } from '@/presentation/components';
-import { Text, colors, radii, shadows, spacing, statusColors } from '@/design-system';
+import { Text, colors, fontFamily, radii, shadows, spacing, statusColors } from '@/design-system';
 import type { Case, Classification } from '@/domain';
 
 export interface HomeCounts {
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   dot: { width: 14, height: 14, borderRadius: 7, marginBottom: spacing.lg },
-  count: { fontSize: 26, fontWeight: '800', marginBottom: spacing.xs },
+  count: { fontFamily: fontFamily.extrabold, fontSize: 26, marginBottom: spacing.xs },
   pressed: { transform: [{ scale: 0.98 }] },
   cta: {
     backgroundColor: colors.brandTeal,

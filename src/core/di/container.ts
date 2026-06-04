@@ -5,12 +5,13 @@ import {
   CaseRepositoryImpl,
   CatalogRepositoryImpl,
   CommentRepositoryImpl,
-  InMemoryLocalDataSource,
   SyncEngine,
   type LocalDataSource,
   type TokenStore,
 } from '@/data';
 import { SecureTokenStore } from '@/data/security/secure-token-store';
+// Import directo (fuera del barrel) para no arrastrar expo-sqlite a los tests.
+import { SqliteLocalDataSource } from '@/data/datasources/local/sqlite-local-data-source';
 import {
   LoginUseCase,
   LogoutUseCase,
@@ -57,7 +58,7 @@ function buildApiClient(tokenStore: TokenStore): ApiClient {
 function createContainer() {
   const tokenStore: TokenStore = new SecureTokenStore();
   const apiClient = buildApiClient(tokenStore);
-  const local: LocalDataSource = new InMemoryLocalDataSource();
+  const local: LocalDataSource = new SqliteLocalDataSource();
   const remote = new ApiRemoteDataSource(apiClient);
 
   const authRepository: AuthRepository = new AuthRepositoryImpl(apiClient, tokenStore);

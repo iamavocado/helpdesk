@@ -17,6 +17,7 @@ interface CasesListData {
   setFilter: (filter: CaseFilter) => void;
   refresh: () => Promise<void>;
   loadMore: () => void;
+  reload: () => Promise<void>;
 }
 
 /** Lista de casos paginada y filtrable por clasificación (offline-first). */
@@ -75,5 +76,22 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
     void fetchPage(page + 1, filter).finally(() => setLoadingMore(false));
   }, [loadingMore, hasMore, fetchPage, page, filter]);
 
-  return { items, filter, refreshing, loadingMore, hasMore, total, setFilter, refresh, loadMore };
+  // Recarga silenciosa (página 1 del filtro actual), p. ej. al enfocar la pantalla.
+  const reload = useCallback(async () => {
+    await repo.refresh();
+    await fetchPage(1, filter);
+  }, [repo, fetchPage, filter]);
+
+  return {
+    items,
+    filter,
+    refreshing,
+    loadingMore,
+    hasMore,
+    total,
+    setFilter,
+    refresh,
+    loadMore,
+    reload,
+  };
 }

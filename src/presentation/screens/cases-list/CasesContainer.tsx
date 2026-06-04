@@ -1,7 +1,8 @@
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useCallback } from 'react';
 
 import { useCasesList } from '@/presentation/hooks/use-cases-list';
 
@@ -19,8 +20,15 @@ export function CasesContainer() {
   const route = useRoute<RouteProp<TabParamList, 'Cases'>>();
   const initial = route.params?.classification ?? 'todos';
 
-  const { items, filter, total, refreshing, loadingMore, setFilter, refresh, loadMore } =
+  const { items, filter, total, refreshing, loadingMore, setFilter, refresh, loadMore, reload } =
     useCasesList(initial);
+
+  // Recarga al volver a la pestaña (p. ej. tras crear un caso).
+  useFocusEffect(
+    useCallback(() => {
+      void reload();
+    }, [reload]),
+  );
 
   return (
     <CasesListScreen

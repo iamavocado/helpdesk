@@ -10,6 +10,8 @@ interface HomeData {
   recent: Case[];
   refreshing: boolean;
   refresh: () => Promise<void>;
+  /** Recarga silenciosa (sin spinner), p. ej. al volver a la pantalla. */
+  reload: () => Promise<void>;
 }
 
 /** Carga casos del repositorio (offline-first) y calcula los totales del dashboard. */
@@ -42,5 +44,5 @@ export function useHomeData(): HomeData {
 
   const recent = useMemo(() => cases.slice(0, 4), [cases]);
 
-  return { counts, recent, refreshing, refresh };
+  return { counts, recent, refreshing, refresh, reload: load };
 }

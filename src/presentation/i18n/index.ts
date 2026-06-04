@@ -20,6 +20,8 @@ void i18n.use(initReactI18next).init({
   resources,
   lng: initialLanguage,
   fallbackLng: defaultLanguage,
+  // Resolutor de plurales clásico: no requiere Intl.PluralRules (no disponible en Hermes).
+  compatibilityJSON: 'v3',
   interpolation: {
     escapeValue: false,
   },

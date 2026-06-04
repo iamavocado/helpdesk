@@ -35,7 +35,7 @@
     "online": "Online",
     "offline": "Offline",
     "pending": "{{count}} pending operation",
-    "pending_other": "{{count}} pending operations",
+    "pending_plural": "{{count}} pending operations",
     "syncing": "Syncing…"
   }
 }

@@ -28,7 +28,10 @@ export function Avatar({ initials, variant = 'requester', size = 28 }: AvatarPro
         },
       ]}
     >
-      <Text color={colors.white} style={[styles.text, { fontSize: size * 0.4 }]}>
+      <Text
+        color={colors.white}
+        style={[styles.text, { fontSize: size * 0.4, lineHeight: size * 0.5 }]}
+      >
         {initials.slice(0, 2).toUpperCase()}
       </Text>
     </View>

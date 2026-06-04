@@ -148,7 +148,12 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   dot: { width: 14, height: 14, borderRadius: 7, marginBottom: spacing.lg },
-  count: { fontFamily: fontFamily.extrabold, fontSize: 26, marginBottom: spacing.xs },
+  count: {
+    fontFamily: fontFamily.extrabold,
+    fontSize: 26,
+    lineHeight: 34,
+    marginBottom: spacing.xs,
+  },
   pressed: { transform: [{ scale: 0.98 }] },
   cta: {
     backgroundColor: colors.brandTeal,

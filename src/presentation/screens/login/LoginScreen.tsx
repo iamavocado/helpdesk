@@ -92,7 +92,7 @@ export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginSc
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.brandDark },
   header: { paddingTop: 90, paddingBottom: spacing['5xl'], alignItems: 'center' },
-  logo: { fontSize: 28, fontWeight: '800', letterSpacing: 2 },
+  logo: { fontSize: 28, lineHeight: 36, fontWeight: '800', letterSpacing: 2 },
   card: {
     flex: 1,
     backgroundColor: colors.bg,

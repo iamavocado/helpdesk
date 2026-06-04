@@ -35,7 +35,7 @@
     "online": "Conectado",
     "offline": "Sin conexión",
     "pending": "{{count}} operación pendiente",
-    "pending_other": "{{count}} operaciones pendientes",
+    "pending_plural": "{{count}} operaciones pendientes",
     "syncing": "Sincronizando…"
   }
 }

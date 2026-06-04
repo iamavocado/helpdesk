@@ -132,7 +132,13 @@ export function CaseDetailScreen({
   );
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="interactive"
+      automaticallyAdjustKeyboardInsets
+    >
       <View style={styles.header}>
         <Pressable accessibilityRole="button" accessibilityLabel="Atrás" onPress={onBack}>
           <Text color={colors.white}>← Atrás</Text>

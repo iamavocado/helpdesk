@@ -109,7 +109,13 @@ export function NewCaseScreen({
   };
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="interactive"
+      automaticallyAdjustKeyboardInsets
+    >
       <Pressable accessibilityRole="button" accessibilityLabel="Atrás" onPress={onCancel}>
         <Text color={colors.brandDark}>← Atrás</Text>
       </Pressable>

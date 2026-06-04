@@ -41,3 +41,4 @@ Thumbs.db
 
 # Datos fuente (no se versionan en la app; viven fuera del repo)
 Script_Data_Estructura_BPMHelpDesk.sql
+swagger.json

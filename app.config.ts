@@ -42,5 +42,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     useMockApi: process.env.USE_MOCK_API ?? 'true',
     enableCertPinning: process.env.ENABLE_CERT_PINNING ?? 'false',
     inactivityTimeoutMinutes: process.env.INACTIVITY_TIMEOUT_MINUTES ?? '30',
+    dominio: process.env.DOMINIO ?? '',
   },
 });

@@ -11,6 +11,7 @@ type RawExtra = {
   useMockApi?: string;
   enableCertPinning?: string;
   inactivityTimeoutMinutes?: string;
+  dominio?: string;
 };
 
 const extra = (Constants.expoConfig?.extra ?? {}) as RawExtra;
@@ -33,5 +34,6 @@ export const env = {
   useMockApi: toBool(extra.useMockApi, true),
   enableCertPinning: toBool(extra.enableCertPinning, false),
   inactivityTimeoutMinutes: toInt(extra.inactivityTimeoutMinutes, 30),
+  dominio: extra.dominio ?? '',
   isDev: (extra.appEnv ?? 'development') === 'development',
 } as const;

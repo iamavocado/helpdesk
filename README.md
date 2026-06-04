@@ -6,7 +6,7 @@ App móvil **offline-first** de gestión de tickets de soporte (helpdesk) para *
 
 ## Stack
 
-- **Expo SDK 51** (RN 0.74) + **TypeScript** estricto
+- **Expo SDK 54** (RN 0.81, React 19) + **TypeScript** estricto
 - Android mín. **API 24** (7.0) · iOS mín. **14.0**
 - Arquitectura limpia por capas: Presentation → Domain → Data (ver [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md))
 - Decisiones de Fase 0 en [`docs/`](docs/): `STACK_DECISION.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`, `SECURITY.md`
@@ -15,7 +15,7 @@ App móvil **offline-first** de gestión de tickets de soporte (helpdesk) para *
 
 | Herramienta               | Versión                                         |
 | ------------------------- | ----------------------------------------------- |
-| Node.js                   | ≥ 18.18                                         |
+| Node.js                   | ≥ 20 (requerido por Expo SDK 54)                |
 | npm                       | ≥ 9                                             |
 | Expo CLI                  | vía `npx expo` (no requiere instalación global) |
 | Android Studio (emulador) | para correr en Android                          |

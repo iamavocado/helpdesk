@@ -6,6 +6,14 @@ y el proyecto adopta [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Mantenimiento — Actualización a Expo SDK 54
+
+- Migración de Expo SDK 51 → **54** (React Native 0.74 → 0.81, React 18 → 19) para poder ejecutar en Expo Go de iOS (que solo soporta el último SDK).
+- Dependencias alineadas con `expo install --fix`; testing actualizado (`@testing-library/react-native` 13, `jest-expo` 54, `react-test-renderer` 19) y `typescript` ~5.9.
+- Añadidas dependencias antes transitivas: `@expo/vector-icons`, `babel-preset-expo`, `expo-asset`.
+- **Requisito nuevo: Node ≥ 20** (el tooling de SDK 54 no corre en Node 18 en Windows).
+- Verificado: typecheck, lint y 73 tests en verde.
+
 ### Fase 5 — Pantallas principales
 
 - Navegación con React Navigation: stack raíz + pestañas inferiores con FAB central (`CustomTabBar`), gate de sesión (Login vs app) y restauración de sesión al arrancar.

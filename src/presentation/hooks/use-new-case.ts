@@ -17,6 +17,9 @@ export function useNewCase(): NewCaseData {
 
   useEffect(() => {
     void (async () => {
+      // Refresca catálogos al abrir (tolerante a falta de red) para evitar
+      // caché obsoleta/parcial; luego lee de local.
+      await catalogRepository.refresh();
       const result = await catalogRepository.getAll();
       if (isOk(result)) setCatalogs(result.value);
     })();

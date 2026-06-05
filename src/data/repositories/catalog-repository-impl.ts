@@ -13,7 +13,8 @@ export class CatalogRepositoryImpl implements CatalogRepository {
 
   async getAll(): Promise<Result<Catalogs, DomainError>> {
     const cached = await this.local.getCatalogs();
-    if (cached) return ok(cached);
+    // Solo se usa la caché si tiene contenido; una caché vacía/parcial se re-consulta.
+    if (cached && cached.equipmentTypes.length > 0) return ok(cached);
 
     const refreshed = await this.refresh();
     if (!refreshed.ok) return refreshed;

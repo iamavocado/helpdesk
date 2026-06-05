@@ -58,7 +58,10 @@ function buildApiClient(tokenStore: TokenStore): ApiClient {
 function createContainer() {
   const tokenStore: TokenStore = new SecureTokenStore();
   const apiClient = buildApiClient(tokenStore);
-  const local: LocalDataSource = new SqliteLocalDataSource();
+  // Base separada por modo para no mezclar datos del mock con los de la API real.
+  const local: LocalDataSource = new SqliteLocalDataSource(
+    env.useMockApi ? 'dozzier-mock.db' : 'dozzier-api.db',
+  );
   const remote = new ApiRemoteDataSource(apiClient);
 
   const authRepository: AuthRepository = new AuthRepositoryImpl(apiClient, tokenStore);

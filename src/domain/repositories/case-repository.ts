@@ -29,6 +29,10 @@ export interface CaseRepository {
   /** Crea un caso (offline-first: persiste local + encola para sync). */
   create(input: NewCaseInput): Promise<Result<Case, DomainError>>;
 
-  /** Refresca la caché local desde el servidor (pull). No falla si no hay red. */
-  refresh(): Promise<Result<void, DomainError>>;
+  /**
+   * Refresca la caché local desde el servidor (pull completo paginado).
+   * Con `force=false` aplica un throttle para no repetir el pull en cada foco.
+   * No falla si no hay red.
+   */
+  refresh(force?: boolean): Promise<Result<void, DomainError>>;
 }

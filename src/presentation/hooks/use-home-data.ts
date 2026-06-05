@@ -20,11 +20,15 @@ export function useHomeData(): HomeData {
   const [cases, setCases] = useState<Case[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    await repo.refresh(); // pull tolerante a falta de red
-    const result = await repo.list({ page: 1, pageSize: 500 });
-    if (isOk(result)) setCases(result.value.items);
-  }, [repo]);
+  const load = useCallback(
+    async (force = false) => {
+      await repo.refresh(force); // pull completo (throttled) tolerante a falta de red
+      // pageSize alto: contamos sobre todos los casos locales para totales exactos.
+      const result = await repo.list({ page: 1, pageSize: 100000 });
+      if (isOk(result)) setCases(result.value.items);
+    },
+    [repo],
+  );
 
   useEffect(() => {
     void load();
@@ -32,7 +36,7 @@ export function useHomeData(): HomeData {
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    await load();
+    await load(true); // pull-to-refresh fuerza el pull completo
     setRefreshing(false);
   }, [load]);
 

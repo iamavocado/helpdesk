@@ -17,6 +17,9 @@ import type { RemoteDataSource } from '../datasources/remote';
 import type { PendingOperation } from '../sync';
 
 const CASES_TABLE = 'cases';
+const REFRESH_TTL_MS = 60_000; // evita re-pull en cada foco
+const PULL_PAGE_SIZE = 200;
+const MAX_PULL_PAGES = 50; // tope de seguridad (~10k casos)
 
 /**
  * Repositorio de casos offline-first:
@@ -104,11 +107,29 @@ export class CaseRepositoryImpl implements CaseRepository {
     }
   }
 
-  async refresh(): Promise<Result<void, DomainError>> {
+  async refresh(force = false): Promise<Result<void, DomainError>> {
     try {
-      const page = await this.remote.fetchCases({ page: 1, pageSize: 100 });
-      await this.local.upsertCases(page.items);
-      await this.local.setLastPulledAt(CASES_TABLE, this.now());
+      const last = await this.local.getLastPulledAt(CASES_TABLE);
+      const now = this.now();
+      // Throttle: si el último pull fue reciente y no es forzado, usar local.
+      if (!force && last != null && now - last < REFRESH_TTL_MS) return ok(undefined);
+
+      // Pull completo paginado para conteos/listas exactos sobre todos los casos.
+      let page = 1;
+      for (;;) {
+        const result = await this.remote.fetchCases({ page, pageSize: PULL_PAGE_SIZE });
+        await this.local.upsertCases(result.items);
+        const fetched = page * PULL_PAGE_SIZE;
+        if (
+          result.items.length < PULL_PAGE_SIZE ||
+          fetched >= result.total ||
+          page >= MAX_PULL_PAGES
+        ) {
+          break;
+        }
+        page++;
+      }
+      await this.local.setLastPulledAt(CASES_TABLE, now);
       return ok(undefined);
     } catch (e) {
       // Tolerante a falta de red: sin conexión, la app sigue con datos locales.

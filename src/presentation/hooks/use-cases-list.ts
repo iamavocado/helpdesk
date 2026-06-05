@@ -49,7 +49,7 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    await repo.refresh();
+    await repo.refresh(true); // pull completo forzado
     await fetchPage(1, filter);
     setRefreshing(false);
   }, [repo, fetchPage, filter]);

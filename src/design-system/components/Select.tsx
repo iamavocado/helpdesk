@@ -8,6 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../tokens';
 import { Text } from './Text';
@@ -43,6 +44,7 @@ export function Select<T extends string | number>({
   containerStyle,
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
+  const insets = useSafeAreaInsets();
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -79,7 +81,7 @@ export function Select<T extends string | number>({
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
-          <Pressable style={styles.sheet}>
+          <Pressable style={[styles.sheet, { paddingBottom: spacing['2xl'] + insets.bottom }]}>
             {label ? (
               <Text variant="sectionTitle" color={colors.brandDark} style={styles.sheetTitle}>
                 {label}

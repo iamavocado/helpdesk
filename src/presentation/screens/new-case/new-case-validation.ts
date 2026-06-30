@@ -2,10 +2,16 @@ export interface NewCaseDraft {
   client: string;
   reportingUser: string;
   endUserEmail: string;
+  departamento: string;
+  cargo: string;
   equipmentTypeId: number | undefined;
   environmentId: number | undefined;
   moduleId: number | undefined;
   hardwareEquipmentId: number | undefined;
+  priorityId: number | undefined;
+  serviceTypeId: number | undefined;
+  referenceNumber: string;
+  location: string;
   caseDetails: string;
 }
 

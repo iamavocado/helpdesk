@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { formatDateTime } from '@/core/utils/date';
 import { Button, Input, Select, Text, colors, radii, spacing } from '@/design-system';
-import type { Catalogs, CatalogItem, NewCaseInput } from '@/domain';
+import type { Catalogs, CatalogItem, NewCaseInput, NewCommentInput } from '@/domain';
 
 import {
   EQUIPMENT_HARDWARE_ID,
@@ -19,8 +20,17 @@ export interface NewCaseScreenProps {
   userEmail: string;
   submitting?: boolean;
   onCancel: () => void;
-  onSubmit: (input: NewCaseInput) => void;
+  onSubmit: (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => void;
 }
+
+const STATUS_OPTIONS = [
+  { label: 'En espera de respuesta soporte', value: 1 },
+  { label: 'Devolver a cola', value: 2 },
+  { label: 'Resuelto', value: 3 },
+  { label: 'Cerrado', value: 4 },
+  { label: 'En espera AIG', value: 5 },
+  { label: 'En espera de respuesta cliente', value: 6 },
+];
 
 const toOptions = (items: CatalogItem[]) =>
   items.map((i) => ({ label: i.description, value: i.id }));
@@ -42,7 +52,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** Formulario de nuevo caso por secciones, con campos condicionales por categoría. */
+/**
+ * Formulario de nuevo caso alineado al "Registro / Datos del Caso" del portal web:
+ * datos del solicitante, clasificación (categoría + condicionales), urgencia,
+ * tipo de servicio, ubicación y asunto. Envía con `onSubmit`.
+ */
 export function NewCaseScreen({
   catalogs,
   userName,
@@ -55,13 +69,25 @@ export function NewCaseScreen({
     client: '',
     reportingUser: '',
     endUserEmail: '',
+    departamento: '',
+    cargo: '',
     equipmentTypeId: undefined,
     environmentId: undefined,
     moduleId: undefined,
     hardwareEquipmentId: undefined,
+    priorityId: undefined,
+    serviceTypeId: undefined,
+    referenceNumber: '',
+    location: '',
     caseDetails: '',
   });
   const [errors, setErrors] = useState<NewCaseErrors>({});
+  const [commentBody, setCommentBody] = useState('');
+  const [commentPrivate, setCommentPrivate] = useState(false);
+  const [commentStatus, setCommentStatus] = useState({
+    id: 1,
+    desc: 'En espera de respuesta soporte',
+  });
 
   const isSoftware = draft.equipmentTypeId === EQUIPMENT_SOFTWARE_ID;
   const isHardware = draft.equipmentTypeId === EQUIPMENT_HARDWARE_ID;
@@ -87,10 +113,19 @@ export function NewCaseScreen({
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
 
+    // Campos del web sin columna propia en el dominio se anexan al detalle.
+    const extras: string[] = [];
+    if (draft.departamento.trim()) extras.push(`Departamento: ${draft.departamento.trim()}`);
+    if (draft.cargo.trim()) extras.push(`Cargo: ${draft.cargo.trim()}`);
+    if (draft.referenceNumber.trim()) extras.push(`N° Referencia: ${draft.referenceNumber.trim()}`);
+    const caseDetails = extras.length
+      ? `${draft.caseDetails.trim()}\n\n${extras.join('\n')}`
+      : draft.caseDetails.trim();
+
     const input: NewCaseInput = {
       equipmentTypeId: draft.equipmentTypeId!,
       equipmentTypeDesc: descById(catalogs.equipmentTypes, draft.equipmentTypeId) ?? '',
-      caseDetails: draft.caseDetails.trim(),
+      caseDetails,
       client: draft.client || null,
       reportingUser: draft.reportingUser || null,
       reportingUserEmail: draft.endUserEmail || null,
@@ -104,8 +139,24 @@ export function NewCaseScreen({
       hardwareEquipmentDesc: isHardware
         ? descById(catalogs.hardwareEquipment, draft.hardwareEquipmentId)
         : null,
+      priorityId: draft.priorityId ?? null,
+      priorityDesc: descById(catalogs.priorities, draft.priorityId),
+      serviceTypeId: draft.serviceTypeId ?? null,
+      serviceTypeDesc: descById(catalogs.serviceTypes, draft.serviceTypeId),
+      location: draft.location || null,
     };
-    onSubmit(input);
+
+    const initialComment = commentBody.trim()
+      ? {
+          body: commentBody.trim(),
+          isPrivate: commentPrivate,
+          statusCaseId: commentStatus.id,
+          statusDesc: commentStatus.desc,
+        }
+      : undefined;
+
+    if (initialComment) onSubmit(input, initialComment);
+    else onSubmit(input);
   };
 
   return (
@@ -123,10 +174,10 @@ export function NewCaseScreen({
         Nuevo caso
       </Text>
       <Text variant="subtitle" color={colors.inkFaint} style={styles.subtitle}>
-        Completa la información del soporte
+        Completa los datos del caso
       </Text>
 
-      <Section title="Información del solicitante">
+      <Section title="Registro">
         <Select
           label="Cliente"
           placeholder="Seleccionar..."
@@ -135,7 +186,7 @@ export function NewCaseScreen({
           onChange={(value) => set('client', value)}
         />
         <Input label="Solicitante" readonly value={userName} />
-        <Input label="Correo del solicitante" readonly value={userEmail} />
+        <Input label="Correo electrónico del solicitante" readonly value={userEmail} />
         <Input label="Fecha de creación" readonly value={formatDateTime(Date.now())} />
         <Input
           label="Oficina o usuario que reporta"
@@ -144,7 +195,7 @@ export function NewCaseScreen({
           onChangeText={(v) => set('reportingUser', v)}
         />
         <Input
-          label="Correo del usuario final"
+          label="Correo de usuario final que reporta"
           placeholder="usuario@empresa.com"
           autoCapitalize="none"
           keyboardType="email-address"
@@ -152,9 +203,19 @@ export function NewCaseScreen({
           onChangeText={(v) => set('endUserEmail', v)}
           error={errors.endUserEmail}
         />
-      </Section>
+        <Input
+          label="Departamento"
+          placeholder="Ej: HELPDESK"
+          value={draft.departamento}
+          onChangeText={(v) => set('departamento', v)}
+        />
+        <Input
+          label="Cargo"
+          placeholder="Ej: Administración"
+          value={draft.cargo}
+          onChangeText={(v) => set('cargo', v)}
+        />
 
-      <Section title="Clasificación">
         <Select
           label="Categoría"
           required
@@ -191,11 +252,35 @@ export function NewCaseScreen({
             onChange={(value) => set('hardwareEquipmentId', value)}
           />
         ) : null}
-      </Section>
 
-      <Section title="Descripción">
+        <Select
+          label="Urgencia"
+          placeholder="Seleccionar..."
+          value={draft.priorityId}
+          options={toOptions(catalogs.priorities)}
+          onChange={(value) => set('priorityId', value)}
+        />
+        <Select
+          label="Tipo de servicio"
+          placeholder="Seleccionar..."
+          value={draft.serviceTypeId}
+          options={toOptions(catalogs.serviceTypes)}
+          onChange={(value) => set('serviceTypeId', value)}
+        />
         <Input
-          label="Detalle"
+          label="Número de referencia"
+          placeholder="Opcional"
+          value={draft.referenceNumber}
+          onChangeText={(v) => set('referenceNumber', v)}
+        />
+        <Input
+          label="Ubicación"
+          placeholder="Ej: Piso 3, oficina 12"
+          value={draft.location}
+          onChangeText={(v) => set('location', v)}
+        />
+        <Input
+          label="Asunto"
           required
           multiline
           placeholder="Describe el problema con el mayor detalle posible..."
@@ -205,13 +290,66 @@ export function NewCaseScreen({
         />
       </Section>
 
+      <Section title="Comentarios">
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: commentPrivate }}
+          accessibilityLabel="Marcar como comentario privado"
+          onPress={() => setCommentPrivate((p) => !p)}
+          style={styles.checkboxRow}
+        >
+          <Ionicons
+            name={commentPrivate ? 'checkbox' : 'square-outline'}
+            size={20}
+            color={commentPrivate ? colors.brandTeal : colors.inkFaint}
+          />
+          <Text variant="body" color={colors.inkSoft}>
+            Privado
+          </Text>
+        </Pressable>
+        <Input
+          label="Descripción"
+          multiline
+          placeholder="Comentario inicial (opcional)..."
+          value={commentBody}
+          onChangeText={setCommentBody}
+        />
+        <Select
+          label="Estado del caso"
+          value={commentStatus.id}
+          options={STATUS_OPTIONS}
+          onChange={(value) => {
+            const opt = STATUS_OPTIONS.find((o) => o.value === value);
+            setCommentStatus({ id: value, desc: opt?.label ?? commentStatus.desc });
+          }}
+        />
+        <View style={styles.attachField}>
+          <Text variant="label" color={colors.inkSoft} style={styles.attachLabel}>
+            Adjunto
+          </Text>
+          <View style={styles.attachRow}>
+            <View style={styles.attachBtn}>
+              <Text variant="caption" color={colors.inkSoft}>
+                Elegir archivo
+              </Text>
+            </View>
+            <Text variant="caption" color={colors.inkFaint}>
+              Sin archivos seleccionados
+            </Text>
+          </View>
+          <Text variant="caption" color={colors.inkFaint} style={styles.attachNote}>
+            Adjuntar archivos estará disponible próximamente.
+          </Text>
+        </View>
+      </Section>
+
       <View style={styles.actions}>
         <Button title="Cancelar" variant="secondary" onPress={onCancel} style={styles.action} />
         <Button
-          title={submitting ? 'Enviando…' : 'Enviar caso'}
+          title={submitting ? 'Enviando…' : 'Solicitar'}
           onPress={submit}
           disabled={submitting}
-          style={styles.action}
+          style={[styles.action, styles.solicitar]}
         />
       </View>
     </ScrollView>
@@ -241,4 +379,24 @@ const styles = StyleSheet.create({
   sectionBar: { width: 4, height: 16, borderRadius: 2, backgroundColor: colors.brandTeal },
   actions: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md },
   action: { flex: 1 },
+  solicitar: { backgroundColor: colors.brandAccent },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+    paddingVertical: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  attachField: { marginBottom: spacing['2xl'] },
+  attachLabel: { marginBottom: spacing.sm },
+  attachRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
+  attachBtn: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radii.input,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f0f3f6',
+  },
+  attachNote: { marginTop: spacing.xs, fontStyle: 'italic' },
 });

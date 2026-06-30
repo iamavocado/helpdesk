@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import type { NewCaseInput } from '@/domain';
+import type { NewCaseInput, NewCommentInput } from '@/domain';
 import { useNewCase } from '@/presentation/hooks/use-new-case';
 import { useAuthStore } from '@/presentation/stores';
 
@@ -21,8 +21,8 @@ export function NewCaseContainer() {
       userEmail={user?.email ?? ''}
       submitting={submitting}
       onCancel={() => navigation.goBack()}
-      onSubmit={async (input: NewCaseInput) => {
-        const created = await submit(input);
+      onSubmit={async (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => {
+        const created = await submit(input, comment);
         if (created) navigation.goBack();
       }}
     />

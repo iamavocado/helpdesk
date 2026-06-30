@@ -39,11 +39,22 @@ export function useCaseDetail(caseId: string): CaseDetailData {
     async (input: Omit<NewCommentInput, 'caseId'>): Promise<boolean> => {
       setSubmitting(true);
       const result = await commentRepository.add({ ...input, caseId });
-      if (isOk(result)) await loadComments();
+      if (isOk(result)) {
+        // Si el comentario lleva un estado, aplícalo también al caso (local).
+        if (input.statusCaseId != null) {
+          const updated = await caseRepository.updateStatus(
+            caseId,
+            input.statusCaseId,
+            input.statusDesc ?? '',
+          );
+          if (isOk(updated)) setCaseItem(updated.value);
+        }
+        await loadComments();
+      }
       setSubmitting(false);
       return isOk(result);
     },
-    [commentRepository, caseId, loadComments],
+    [commentRepository, caseRepository, caseId, loadComments],
   );
 
   return { caseItem, comments, loading, submitting, addComment };

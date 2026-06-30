@@ -2,6 +2,7 @@ import { DomainError, notFoundError, unknownError } from '@/core/errors';
 import { uuid } from '@/core/utils/id';
 import {
   classificationFromId,
+  classificationIdFromStatus,
   ok,
   err,
   type Case,
@@ -104,6 +105,30 @@ export class CaseRepositoryImpl implements CaseRepository {
       return ok(newCase);
     } catch (e) {
       return err(unknownError('No se pudo crear el caso', e));
+    }
+  }
+
+  async updateStatus(
+    id: string,
+    statusCaseId: number,
+    statusCaseDesc: string,
+  ): Promise<Result<Case, DomainError>> {
+    try {
+      const existing = await this.local.getCaseById(id);
+      if (!existing) return err(notFoundError(`Caso ${id} no encontrado`));
+      const classificationId = classificationIdFromStatus(statusCaseId);
+      const updated: Case = {
+        ...existing,
+        statusCaseId,
+        statusCaseDesc,
+        classificationId,
+        classification: classificationFromId(classificationId),
+        modificationDate: this.now(),
+      };
+      await this.local.putCase(updated);
+      return ok(updated);
+    } catch (e) {
+      return err(unknownError('No se pudo actualizar el estado del caso', e));
     }
   }
 

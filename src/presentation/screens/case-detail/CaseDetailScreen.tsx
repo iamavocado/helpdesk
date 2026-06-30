@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { formatDateTime, formatTime } from '@/core/utils/date';
@@ -31,10 +31,12 @@ export interface CaseDetailScreenProps {
 }
 
 const STATUS_OPTIONS = [
-  { label: 'Pendiente', value: 1 },
-  { label: 'En Cola', value: 2 },
+  { label: 'En espera de respuesta soporte', value: 1 },
+  { label: 'Devolver a cola', value: 2 },
   { label: 'Resuelto', value: 3 },
   { label: 'Cerrado', value: 4 },
+  { label: 'En espera AIG', value: 5 },
+  { label: 'En espera de respuesta cliente', value: 6 },
 ];
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -100,9 +102,22 @@ export function CaseDetailScreen({
     body: '',
     isPrivate: false,
     statusCaseId: 1,
-    statusDesc: 'Pendiente',
+    statusDesc: 'En espera de respuesta soporte',
   });
   const [error, setError] = useState<string | undefined>();
+
+  // Refleja el estado actual del caso en el selector al cargar/cambiar.
+  const currentStatusId = caseItem?.statusCaseId;
+  const currentStatusDesc = caseItem?.statusCaseDesc;
+  useEffect(() => {
+    if (currentStatusId != null) {
+      setDraft((d) => ({
+        ...d,
+        statusCaseId: currentStatusId,
+        statusDesc: currentStatusDesc ?? '',
+      }));
+    }
+  }, [currentStatusId, currentStatusDesc]);
 
   if (!caseItem) {
     return (
@@ -130,6 +145,32 @@ export function CaseDetailScreen({
   const meta = [caseItem.equipmentTypeDesc, caseItem.softwareEnvironmentDesc].filter(
     (x): x is string => !!x,
   );
+
+  const infoRows = (
+    [
+      ['Estado', caseItem.statusCaseDesc],
+      ['Cliente', caseItem.client],
+      ['Categoría', caseItem.equipmentTypeDesc],
+      ['Módulo', caseItem.softwareModuleDesc],
+      ['Equipo', caseItem.hardwareEquipmentDesc],
+      ['Ambiente', caseItem.softwareEnvironmentDesc],
+      ['Tipo de servicio', caseItem.serviceTypeDesc],
+      ['Prioridad', caseItem.priorityDesc],
+      ['Ubicación', caseItem.location],
+      ['Solicitante', caseItem.userRequester],
+      ['Correo solicitante', caseItem.requesterEmail],
+      ['Oficina/usuario que reporta', caseItem.reportingUser],
+      ['Correo usuario final', caseItem.reportingUserEmail],
+      ['País', caseItem.countryDesc],
+      ['Departamento', caseItem.departmentDesc],
+      ['Técnico', caseItem.technician],
+      ['Creado', formatDateTime(caseItem.creationDate)],
+      ['Modificado', formatDateTime(caseItem.modificationDate)],
+      ['Solución', caseItem.solutionDate ? formatDateTime(caseItem.solutionDate) : null],
+    ] as [string, string | null][]
+  )
+    .filter((r): r is [string, string] => !!r[1])
+    .map(([label, value]) => ({ label, value }));
 
   return (
     <ScrollView
@@ -166,15 +207,20 @@ export function CaseDetailScreen({
       </View>
 
       <View style={styles.infoGrid}>
-        <InfoRow label="Cliente" value={caseItem.client ?? '—'} />
-        <InfoRow
-          label="Módulo/Equipo"
-          value={caseItem.softwareModuleDesc ?? caseItem.hardwareEquipmentDesc ?? '—'}
-        />
-        <InfoRow label="Creado" value={formatDateTime(caseItem.creationDate)} />
-        <InfoRow label="Solicitante" value={caseItem.userRequester || '—'} />
-        <InfoRow label="Prioridad" value={caseItem.priorityDesc ?? '—'} />
+        {infoRows.map((r) => (
+          <InfoRow key={r.label} label={r.label} value={r.value} />
+        ))}
       </View>
+      {caseItem.caseDetails ? (
+        <View style={styles.detailBlock}>
+          <Text variant="sectionLabel" color={colors.inkFaint} style={styles.detailLabel}>
+            Asunto
+          </Text>
+          <Text variant="body" color={colors.inkSoft}>
+            {caseItem.caseDetails}
+          </Text>
+        </View>
+      ) : null}
 
       <Text variant="sectionLabel" color={colors.inkFaint} style={styles.sectionLabel}>
         Conversación
@@ -235,7 +281,7 @@ export function CaseDetailScreen({
           </Text>
         </Pressable>
         <Button
-          title={submitting ? 'Enviando…' : 'Enviar comentario'}
+          title={submitting ? 'Guardando…' : 'Guardar'}
           onPress={submit}
           disabled={submitting}
         />
@@ -285,7 +331,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
   },
-  infoValue: { flexShrink: 1, textAlign: 'right' },
+  infoValue: { flexShrink: 1, textAlign: 'right', marginLeft: spacing.lg },
+  detailBlock: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    borderWidth: 1,
+    borderColor: colors.line,
+    padding: spacing['3xl'],
+    marginHorizontal: spacing.screen,
+    marginBottom: spacing.lg,
+  },
+  detailLabel: { marginBottom: spacing.sm },
   sectionLabel: { marginHorizontal: spacing.screen, marginBottom: spacing.xl },
   noComments: { marginHorizontal: spacing.screen },
   comment: {

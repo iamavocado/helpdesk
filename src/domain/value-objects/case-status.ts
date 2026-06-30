@@ -35,3 +35,21 @@ export function classificationFromId(id: number | null | undefined): Classificat
 export function classificationLabel(c: Classification): string {
   return CLASSIFICATION_LABEL[c];
 }
+
+/**
+ * `StatusCase.Id` → `ClassificationStatusCase.Id` (heurística documentada):
+ * 1,5,6 → Pendiente · 2 → Cola · 3,4 → Cerrado. Ver `http-api-client.ts`.
+ */
+const STATUS_TO_CLASSIFICATION: Readonly<Record<number, number>> = {
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 3,
+  5: 1,
+  6: 1,
+};
+
+export function classificationIdFromStatus(statusCaseId: number | null | undefined): number {
+  if (statusCaseId == null) return 1;
+  return STATUS_TO_CLASSIFICATION[statusCaseId] ?? 1;
+}

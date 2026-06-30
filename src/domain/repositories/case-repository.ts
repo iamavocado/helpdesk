@@ -30,6 +30,16 @@ export interface CaseRepository {
   create(input: NewCaseInput): Promise<Result<Case, DomainError>>;
 
   /**
+   * Actualiza el estado del caso en local (el cambio viaja al servidor a través
+   * del comentario que lo acompaña, cuyo `statusCaseId` lo aplica el backend).
+   */
+  updateStatus(
+    id: string,
+    statusCaseId: number,
+    statusCaseDesc: string,
+  ): Promise<Result<Case, DomainError>>;
+
+  /**
    * Refresca la caché local desde el servidor (pull completo paginado).
    * Con `force=false` aplica un throttle para no repetir el pull en cada foco.
    * No falla si no hay red.

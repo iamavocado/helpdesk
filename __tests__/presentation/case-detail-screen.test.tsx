@@ -99,7 +99,7 @@ describe('CaseDetailScreen', () => {
         onSubmitComment={onSubmitComment}
       />,
     );
-    fireEvent.press(getByText('Enviar comentario'));
+    fireEvent.press(getByText('Guardar'));
     expect(onSubmitComment).not.toHaveBeenCalled();
     expect(getByText('Escribe un comentario')).toBeTruthy();
   });
@@ -115,7 +115,7 @@ describe('CaseDetailScreen', () => {
       />,
     );
     fireEvent.changeText(getByLabelText('Descripción'), 'Revisado, todo OK');
-    fireEvent.press(getByText('Enviar comentario'));
+    fireEvent.press(getByText('Guardar'));
     expect(onSubmitComment).toHaveBeenCalledWith(
       expect.objectContaining({ body: 'Revisado, todo OK', isPrivate: false }),
     );

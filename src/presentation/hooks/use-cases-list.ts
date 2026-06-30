@@ -54,9 +54,11 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
     setRefreshing(false);
   }, [repo, fetchPage, filter]);
 
-  // Carga inicial y al cambiar el filtro.
+  // Carga inicial y al cambiar el filtro: local primero (instantáneo), luego
+  // sincroniza en segundo plano y refresca.
   useEffect(() => {
     void (async () => {
+      await fetchPage(1, filter);
       await repo.refresh();
       await fetchPage(1, filter);
     })();
@@ -78,6 +80,7 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
 
   // Recarga silenciosa (página 1 del filtro actual), p. ej. al enfocar la pantalla.
   const reload = useCallback(async () => {
+    await fetchPage(1, filter);
     await repo.refresh();
     await fetchPage(1, filter);
   }, [repo, fetchPage, filter]);

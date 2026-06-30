@@ -22,10 +22,14 @@ export function useHomeData(): HomeData {
 
   const load = useCallback(
     async (force = false) => {
+      // 1) Pinta primero desde la BD local: la pantalla aparece al instante
+      //    sin esperar la red (offline-first / stale-while-revalidate).
+      const cached = await repo.list({ page: 1, pageSize: 100000 });
+      if (isOk(cached)) setCases(cached.value.items);
+      // 2) Sincroniza en segundo plano y actualiza los totales con lo nuevo.
       await repo.refresh(force); // pull completo (throttled) tolerante a falta de red
-      // pageSize alto: contamos sobre todos los casos locales para totales exactos.
-      const result = await repo.list({ page: 1, pageSize: 100000 });
-      if (isOk(result)) setCases(result.value.items);
+      const fresh = await repo.list({ page: 1, pageSize: 100000 });
+      if (isOk(fresh)) setCases(fresh.value.items);
     },
     [repo],
   );

@@ -1,5 +1,6 @@
 import { env } from '@/core/config/env';
 import type {
+  AttachmentDto,
   AuthTokensDto,
   CaseDto,
   CatalogItemDto,
@@ -9,6 +10,7 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
 } from '@/data/datasources/remote/dto';
+import type { FileToUpload } from '@/domain';
 
 import type { ApiClient, GetCasesParams, PagedDto } from './api-client';
 import { ApiError } from './api-error';
@@ -92,6 +94,13 @@ interface ApiComment {
   statusDesc: string | null;
   userRequester: string | null;
   isPrivate: boolean | null;
+  attachedFile: string | null;
+}
+
+interface ApiAttachment {
+  id: number;
+  idCaseComment: number;
+  idCase: number;
   attachedFile: string | null;
 }
 
@@ -297,6 +306,69 @@ export class HttpApiClient implements ApiClient {
     return this.commentToDto(c);
   }
 
+  /**
+   * Adjuntos de un caso. El backend no permite filtrar por caso, así que se trae
+   * una página amplia y se filtra por `idCase` en el cliente (mismo workaround
+   * que `getComments`; pendiente de que la API acepte el filtro).
+   */
+  async getAttachments(caseServerId: number): Promise<AttachmentDto[]> {
+    const q = new URLSearchParams();
+    q.set('numeroPagina', '1');
+    q.set('tamanoPagina', '2000');
+    const page = await this.authed<Paginado<ApiAttachment>>(
+      `/api/CasesCommentsAttach?${q.toString()}`,
+    );
+    return (page.items ?? [])
+      .filter((a) => a.idCase === caseServerId)
+      .map((a) => this.attachmentToDto(a));
+  }
+
+  /**
+   * Sube un archivo (multipart/form-data). No usa `call()` porque el body es
+   * FormData: fetch debe fijar el boundary del Content-Type automáticamente.
+   */
+  async uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<AttachmentDto> {
+    const form = new FormData();
+    form.append('IdCaseComment', String(commentServerId));
+    form.append('IdCase', String(caseServerId));
+    // En React Native el archivo se adjunta como {uri, name, type}.
+    form.append('File', {
+      uri: file.uri,
+      name: file.name,
+      type: file.mimeType,
+    } as unknown as Blob);
+
+    const attach = await withAuthRetry(
+      async (token) => {
+        let res: Response;
+        try {
+          res = await fetch(`${this.baseUrl}/api/CasesCommentsAttach/upload-file`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: form,
+          });
+        } catch (cause) {
+          throw new ApiError(0, `Fallo de red: ${String(cause)}`);
+        }
+        if (!res.ok) throw new ApiError(res.status, `HTTP ${res.status} al subir el adjunto`);
+        const body = (await res.json()) as ApiRespuesta<ApiAttachment>;
+        if (body && body.exitoso === false) {
+          throw new ApiError(body.codigoEstado || 400, body.mensaje ?? 'Error al subir el adjunto');
+        }
+        return body.datos;
+      },
+      { getToken: this.getToken, refresh: this.refreshToken },
+    );
+    return this.attachmentToDto(attach);
+  }
+
   async getCatalogs(): Promise<CatalogsDto> {
     const fetchCat = (name: string) =>
       this.authed<ApiCatalogItem[]>(`/api/${name}/todos`).catch(() => [] as ApiCatalogItem[]);
@@ -390,6 +462,15 @@ export class HttpApiClient implements ApiClient {
       HardwareEquipmentDesc: c.hardwareEquipmentDesc,
       CountryDesc: c.countryDesc,
       DepartmentDesc: c.departmentDesc,
+    };
+  }
+
+  private attachmentToDto(a: ApiAttachment): AttachmentDto {
+    return {
+      Id: a.id,
+      IdCaseComment: a.idCaseComment,
+      IdCase: a.idCase,
+      AttachedFile: a.attachedFile,
     };
   }
 

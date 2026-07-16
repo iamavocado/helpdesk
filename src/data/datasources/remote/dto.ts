@@ -71,6 +71,14 @@ export interface CreateCaseDto {
   Location?: string | null;
 }
 
+/** Adjunto de un comentario tal como lo devuelve la API (CasesCommentsAttachDto). */
+export interface AttachmentDto {
+  Id: number;
+  IdCaseComment: number;
+  IdCase: number;
+  AttachedFile: string | null;
+}
+
 /** Cuerpo para agregar un comentario en el servidor. */
 export interface CreateCommentDto {
   IdCase: number;

@@ -5,11 +5,20 @@ import {
   unknownError,
   authError,
 } from '@/core/errors';
-import type { Case, Catalogs, Comment, NewCaseInput, NewCommentInput } from '@/domain';
+import type {
+  Attachment,
+  Case,
+  Catalogs,
+  Comment,
+  FileToUpload,
+  NewCaseInput,
+  NewCommentInput,
+} from '@/domain';
 import { ApiError, type ApiClient, type GetCasesParams } from '@/services/api';
 
 import {
   catalogsDtoToDomain,
+  dtoToAttachment,
   dtoToCase,
   dtoToComment,
   newCaseToCreateDto,
@@ -45,6 +54,12 @@ export interface RemoteDataSource {
   fetchComments(caseServerId: number, caseLocalId: string): Promise<Comment[]>;
   createComment(input: NewCommentInput, caseServerId: number): Promise<Comment>;
   fetchCatalogs(): Promise<Catalogs>;
+  fetchAttachments(caseServerId: number): Promise<Attachment[]>;
+  uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<Attachment>;
 }
 
 export class ApiRemoteDataSource implements RemoteDataSource {
@@ -101,6 +116,27 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   async fetchCatalogs(): Promise<Catalogs> {
     try {
       return catalogsDtoToDomain(await this.api.getCatalogs());
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchAttachments(caseServerId: number): Promise<Attachment[]> {
+    try {
+      const dtos = await this.api.getAttachments(caseServerId);
+      return dtos.map(dtoToAttachment);
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<Attachment> {
+    try {
+      return dtoToAttachment(await this.api.uploadAttachment(commentServerId, caseServerId, file));
     } catch (e) {
       throw toDomainError(e);
     }

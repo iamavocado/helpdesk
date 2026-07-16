@@ -9,6 +9,7 @@ import {
   caseDisplayId,
   caseTitle,
   classificationLabel,
+  type Attachment,
   type Case,
   type Comment,
   type NewCommentInput,
@@ -24,10 +25,16 @@ export interface CommentDraft {
 export interface CaseDetailScreenProps {
   caseItem: Case | null;
   comments: Comment[];
+  /** Adjuntos por `serverId` de comentario. */
+  attachments?: Record<number, Attachment[]>;
   loading?: boolean;
   submitting?: boolean;
+  /** `serverId` del comentario cuyo adjunto se está subiendo. */
+  uploadingFor?: number | null;
   onBack: () => void;
   onSubmitComment: (input: Omit<NewCommentInput, 'caseId'>) => void;
+  /** Pide elegir un archivo y subirlo al comentario indicado. */
+  onPickAttachment?: (commentServerId: number) => void;
 }
 
 const STATUS_OPTIONS = [
@@ -52,7 +59,21 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CommentBubble({ comment, isRequester }: { comment: Comment; isRequester: boolean }) {
+function CommentBubble({
+  comment,
+  isRequester,
+  files = [],
+  uploading = false,
+  onPickAttachment,
+}: {
+  comment: Comment;
+  isRequester: boolean;
+  files?: Attachment[];
+  uploading?: boolean;
+  onPickAttachment?: (commentServerId: number) => void;
+}) {
+  // Solo se puede adjuntar a comentarios ya sincronizados (necesitan serverId).
+  const canAttach = comment.serverId != null && !!onPickAttachment;
   return (
     <View style={[styles.comment, comment.isPrivate && styles.commentPrivate]}>
       <View style={styles.commentHeader}>
@@ -86,6 +107,38 @@ function CommentBubble({ comment, isRequester }: { comment: Comment; isRequester
       <Text variant="body" color={colors.inkSoft}>
         {comment.body}
       </Text>
+
+      {files.length > 0 ? (
+        <View style={styles.files}>
+          {files.map((f) => (
+            <View key={f.serverId} style={styles.fileRow}>
+              <Ionicons name="document-attach-outline" size={16} color={colors.brandTeal} />
+              <Text variant="caption" color={colors.inkSoft} style={styles.fileName}>
+                {f.fileName}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      {canAttach ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Adjuntar archivo"
+          disabled={uploading}
+          onPress={() => onPickAttachment?.(comment.serverId as number)}
+          style={styles.attachAction}
+        >
+          <Ionicons
+            name={uploading ? 'cloud-upload-outline' : 'attach-outline'}
+            size={16}
+            color={colors.brandTeal}
+          />
+          <Text variant="caption" color={colors.brandTeal}>
+            {uploading ? 'Subiendo…' : 'Adjuntar archivo'}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -94,9 +147,12 @@ function CommentBubble({ comment, isRequester }: { comment: Comment; isRequester
 export function CaseDetailScreen({
   caseItem,
   comments,
+  attachments = {},
   submitting = false,
+  uploadingFor = null,
   onBack,
   onSubmitComment,
+  onPickAttachment,
 }: CaseDetailScreenProps) {
   const [draft, setDraft] = useState<CommentDraft>({
     body: '',
@@ -235,6 +291,9 @@ export function CaseDetailScreen({
             key={c.id}
             comment={c}
             isRequester={c.authorName === caseItem.userRequester}
+            files={c.serverId != null ? attachments[c.serverId] : undefined}
+            uploading={uploadingFor === c.serverId}
+            onPickAttachment={onPickAttachment}
           />
         ))
       )}
@@ -367,6 +426,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 1,
     borderRadius: radii.pill,
+  },
+  files: { marginTop: spacing.md, gap: spacing.xs },
+  fileRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  fileName: { flexShrink: 1 },
+  attachAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    alignSelf: 'flex-start',
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
   },
   formSection: {
     backgroundColor: colors.surface,

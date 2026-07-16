@@ -1,8 +1,9 @@
 import { serverLocalId } from '@/core/utils/id';
-import type { Case, Catalogs, Comment, NewCaseInput, NewCommentInput } from '@/domain';
+import type { Attachment, Case, Catalogs, Comment, NewCaseInput, NewCommentInput } from '@/domain';
 import { classificationFromId } from '@/domain';
 
 import type {
+  AttachmentDto,
   CaseDto,
   CatalogItemDto,
   CatalogsDto,
@@ -70,6 +71,16 @@ export function dtoToComment(dto: CommentDto, caseLocalId: string): Comment {
     statusDesc: dto.StatusDesc,
     hasAttachment: !!dto.AttachedFile,
     syncStatus: 'synced',
+  };
+}
+
+/** DTO de adjunto → dominio. */
+export function dtoToAttachment(dto: AttachmentDto): Attachment {
+  return {
+    serverId: dto.Id,
+    commentServerId: dto.IdCaseComment,
+    caseServerId: dto.IdCase,
+    fileName: dto.AttachedFile ?? '',
   };
 }
 

@@ -1,4 +1,5 @@
 import type {
+  AttachmentDto,
   AuthTokensDto,
   CaseDto,
   CatalogsDto,
@@ -7,6 +8,7 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
 } from '@/data/datasources/remote/dto';
+import type { FileToUpload } from '@/domain';
 import { generateSeed, type SeedData } from '@/mock';
 
 import type { ApiClient, GetCasesParams, PagedDto } from './api-client';
@@ -30,6 +32,8 @@ export class MockApiClient implements ApiClient {
   private catalogs: CatalogsDto;
   private latencyMs: number;
   private nextCaseId: number;
+  private attachments: AttachmentDto[] = [];
+  private nextAttachmentId = 1;
 
   constructor(options: MockApiClientOptions = {}) {
     const data = options.seed ?? generateSeed();
@@ -179,5 +183,33 @@ export class MockApiClient implements ApiClient {
   async getCatalogs(): Promise<CatalogsDto> {
     await this.delay();
     return this.catalogs;
+  }
+
+  async getAttachments(caseServerId: number): Promise<AttachmentDto[]> {
+    await this.delay();
+    return this.attachments.filter((a) => a.IdCase === caseServerId);
+  }
+
+  async uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<AttachmentDto> {
+    await this.delay();
+    const exists = this.comments.some((c) => c.Id === commentServerId && c.IdCase === caseServerId);
+    if (!exists) {
+      throw new ApiError(
+        404,
+        `Comentario ${commentServerId} del caso ${caseServerId} no encontrado`,
+      );
+    }
+    const created: AttachmentDto = {
+      Id: this.nextAttachmentId++,
+      IdCaseComment: commentServerId,
+      IdCase: caseServerId,
+      AttachedFile: file.name,
+    };
+    this.attachments.push(created);
+    return created;
   }
 }

@@ -3,8 +3,10 @@ import { uuid } from '@/core/utils/id';
 import {
   ok,
   err,
+  type Attachment,
   type Comment,
   type CommentRepository,
+  type FileToUpload,
   type NewCommentInput,
   type Result,
 } from '@/domain';
@@ -85,6 +87,30 @@ export class CommentRepositoryImpl implements CommentRepository {
       // Tolerante a falta de red: se muestran los comentarios locales.
       if (e instanceof DomainError && e.kind === 'network') return ok(undefined);
       return err(e instanceof DomainError ? e : unknownError('Fallo al refrescar comentarios', e));
+    }
+  }
+
+  async listAttachments(caseServerId: number): Promise<Result<Attachment[], DomainError>> {
+    try {
+      return ok(await this.remote.fetchAttachments(caseServerId));
+    } catch (e) {
+      // Sin red no hay adjuntos que mostrar: se degrada a lista vacía.
+      if (e instanceof DomainError && e.kind === 'network') return ok([]);
+      return err(
+        e instanceof DomainError ? e : unknownError('No se pudieron listar los adjuntos', e),
+      );
+    }
+  }
+
+  async uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<Result<Attachment, DomainError>> {
+    try {
+      return ok(await this.remote.uploadAttachment(commentServerId, caseServerId, file));
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('No se pudo subir el adjunto', e));
     }
   }
 }

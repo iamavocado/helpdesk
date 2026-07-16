@@ -1,4 +1,5 @@
 import type {
+  AttachmentDto,
   AuthTokensDto,
   CaseDto,
   CatalogsDto,
@@ -7,6 +8,7 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
 } from '@/data/datasources/remote/dto';
+import type { FileToUpload } from '@/domain';
 
 export interface GetCasesParams {
   classificationId?: number;
@@ -38,4 +40,13 @@ export interface ApiClient {
   getComments(caseServerId: number): Promise<CommentDto[]>;
   addComment(dto: CreateCommentDto): Promise<CommentDto>;
   getCatalogs(): Promise<CatalogsDto>;
+
+  /** Adjuntos de los comentarios de un caso. */
+  getAttachments(caseServerId: number): Promise<AttachmentDto[]>;
+  /** Sube un archivo asociado a un comentario (multipart/form-data). */
+  uploadAttachment(
+    commentServerId: number,
+    caseServerId: number,
+    file: FileToUpload,
+  ): Promise<AttachmentDto>;
 }

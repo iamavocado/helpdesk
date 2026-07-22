@@ -28,8 +28,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (credentials) => {
     set({ status: 'loading', error: null });
-    const result = await getContainer().loginUseCase.execute(credentials);
+    const container = getContainer();
+    const result = await container.loginUseCase.execute(credentials);
     if (isOk(result)) {
+      // La API filtra los datos por usuario. Se parte de una caché local limpia
+      // para reflejar exactamente lo del servidor y no mezclar datos de una
+      // sesión/usuario anterior (correctitud + privacidad de datos confidenciales).
+      await container.local.clear();
       set({ user: result.value, status: 'authenticated', error: null });
     } else {
       set({ status: 'unauthenticated', error: result.error.message });
@@ -37,7 +42,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    await getContainer().logoutUseCase.execute();
+    const container = getContainer();
+    await container.logoutUseCase.execute();
+    await container.local.clear(); // no dejar datos del usuario anterior en el dispositivo
     set({ user: null, status: 'unauthenticated', error: null });
   },
 }));

@@ -35,6 +35,9 @@ describe('CatalogRepositoryImpl', () => {
       fetchCatalogs: () => Promise.reject(networkError()),
       fetchAttachments: () => Promise.reject(networkError()),
       uploadAttachment: () => Promise.reject(networkError()),
+      fetchMembers: () => Promise.reject(networkError()),
+      fetchStatusCaseSubStatuses: () => Promise.reject(networkError()),
+      updateCase: () => Promise.reject(networkError()),
     };
     const repo = new CatalogRepositoryImpl(local, offline);
     const result = await repo.getAll();

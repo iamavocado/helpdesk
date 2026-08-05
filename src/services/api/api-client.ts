@@ -2,11 +2,14 @@ import type {
   AttachmentDto,
   AuthTokensDto,
   CaseDto,
+  CatalogItemDto,
   CatalogsDto,
   CommentDto,
   CreateCaseDto,
   CreateCommentDto,
   LoginRequestDto,
+  MemberDto,
+  UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
 
@@ -40,6 +43,13 @@ export interface ApiClient {
   getComments(caseServerId: number): Promise<CommentDto[]>;
   addComment(dto: CreateCommentDto): Promise<CommentDto>;
   getCatalogs(): Promise<CatalogsDto>;
+
+  /** Personas asignables (para el select "Asignar a" del modal de reasignación). */
+  getMembers(department: string, jfg: string): Promise<MemberDto[]>;
+  /** Subestados detallados (StatusCaseSubStatus: En desarrollo, En validación…). */
+  getStatusCaseSubStatuses(): Promise<CatalogItemDto[]>;
+  /** Actualiza/reasigna un caso (PUT). Devuelve el caso actualizado. */
+  updateCase(dto: UpdateCaseDto): Promise<CaseDto>;
 
   /** Adjuntos de los comentarios de un caso. */
   getAttachments(caseServerId: number): Promise<AttachmentDto[]>;

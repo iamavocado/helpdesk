@@ -2,11 +2,14 @@ import type {
   AttachmentDto,
   AuthTokensDto,
   CaseDto,
+  CatalogItemDto,
   CatalogsDto,
   CommentDto,
   CreateCaseDto,
   CreateCommentDto,
   LoginRequestDto,
+  MemberDto,
+  UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
 import { generateSeed, type SeedData } from '@/mock';
@@ -183,6 +186,57 @@ export class MockApiClient implements ApiClient {
   async getCatalogs(): Promise<CatalogsDto> {
     await this.delay();
     return this.catalogs;
+  }
+
+  async getMembers(): Promise<MemberDto[]> {
+    await this.delay();
+    // Lista demo equivalente a la del portal (en real viene de Ultimus/AD).
+    return [
+      'Irvin Josué Acosta Chávez',
+      'Rommel Pérez',
+      'Roberto Rueda',
+      'Angel Alvarado',
+      'Diego Tapias',
+      'Daniel Tapias',
+      'Soporte SPA nivel 2',
+      'Soporte Salas Audiencias',
+    ].map((fullName, i) => ({
+      UserFullName: fullName,
+      UserName: `DESA/user${i + 1}`,
+      EmailAddress: null,
+      JobFunction: 'Soporte',
+    }));
+  }
+
+  async getStatusCaseSubStatuses(): Promise<CatalogItemDto[]> {
+    await this.delay();
+    return [
+      { Id: 1, Description: 'En desarrollo', Enable: true },
+      { Id: 2, Description: 'En validación', Enable: true },
+      { Id: 3, Description: 'En espera pase a producción', Enable: true },
+      { Id: 4, Description: 'Para revisión', Enable: true },
+    ];
+  }
+
+  async updateCase(dto: UpdateCaseDto): Promise<CaseDto> {
+    await this.delay();
+    const idx = this.cases.findIndex((c) => c.Id === dto.Id);
+    if (idx < 0) throw new ApiError(404, `Caso ${dto.Id} no encontrado`);
+    const current = this.cases[idx];
+    const updated: CaseDto = {
+      ...current,
+      StatusCaseId: dto.StatusCaseId ?? current.StatusCaseId,
+      ClassificationCaseId: dto.ClassificationCaseId ?? current.ClassificationCaseId,
+      ServiceTypeId: dto.ServiceTypeId ?? current.ServiceTypeId,
+      EquipmentTypeId: dto.EquipmentTypeId ?? current.EquipmentTypeId,
+      Location: dto.Location ?? current.Location,
+      CaseDetails: dto.CaseDetails ?? current.CaseDetails,
+      Technician: dto.Technician ?? current.Technician,
+      SubStatusCaseId: dto.SubStatusCaseId ?? current.SubStatusCaseId,
+      ModificationDate: new Date().toISOString(),
+    };
+    this.cases[idx] = updated;
+    return updated;
   }
 
   async getAttachments(caseServerId: number): Promise<AttachmentDto[]> {

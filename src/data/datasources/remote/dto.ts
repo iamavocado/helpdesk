@@ -71,6 +71,34 @@ export interface CreateCaseDto {
   Location?: string | null;
 }
 
+/** Persona asignable (GET /api/ultimus-user-members). */
+export interface MemberDto {
+  UserFullName: string;
+  UserName: string;
+  EmailAddress: string | null;
+  JobFunction: string | null;
+}
+
+/** Cuerpo para actualizar/reasignar un caso (PUT /api/Case/{id} → ActualizarCaseCommand). */
+export interface UpdateCaseDto {
+  Id: number;
+  UserRequester?: string | null;
+  StatusCaseId?: number | null;
+  ClassificationCaseId?: number | null;
+  PriorityId?: number | null;
+  ServiceTypeId?: number | null;
+  EquipmentTypeId?: number | null;
+  Serial?: string | null;
+  Location?: string | null;
+  CaseDetails?: string | null;
+  Technician?: string | null;
+  EmailRequester?: string | null;
+  SubStatusCaseId?: number | null;
+  StatusCaseSubStatusId?: number | null;
+  StatusCaseSubStatusDesc?: string | null;
+  SolutionDate?: string | null;
+}
+
 /** Adjunto de un comentario tal como lo devuelve la API (CasesCommentsAttachDto). */
 export interface AttachmentDto {
   Id: number;

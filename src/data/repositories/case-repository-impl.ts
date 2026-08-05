@@ -10,6 +10,8 @@ import {
   type ListCasesParams,
   type NewCaseInput,
   type PagedCases,
+  type ReassignInput,
+  type ReassignOptions,
   type Result,
 } from '@/domain';
 
@@ -129,6 +131,37 @@ export class CaseRepositoryImpl implements CaseRepository {
       return ok(updated);
     } catch (e) {
       return err(unknownError('No se pudo actualizar el estado del caso', e));
+    }
+  }
+
+  async getReassignOptions(): Promise<Result<ReassignOptions, DomainError>> {
+    try {
+      const [members, statusSubStatuses] = await Promise.all([
+        this.remote.fetchMembers('HelpDesk', 'Soporte'),
+        this.remote.fetchStatusCaseSubStatuses(),
+      ]);
+      return ok({ members, statusSubStatuses });
+    } catch (e) {
+      return err(
+        e instanceof DomainError ? e : unknownError('No se pudieron cargar las opciones', e),
+      );
+    }
+  }
+
+  async reassign(id: string, input: ReassignInput): Promise<Result<Case, DomainError>> {
+    try {
+      const local = await this.local.getCaseById(id);
+      if (!local) return err(notFoundError(`Caso ${id} no encontrado`));
+      if (local.serverId == null) {
+        return err(unknownError('El caso aún no está sincronizado; no se puede reasignar'));
+      }
+      const updated = await this.remote.updateCase(local, input);
+      // El servidor manda: se refleja tal cual en local (conserva el id local).
+      const merged: Case = { ...updated, id: local.id, syncStatus: 'synced' };
+      await this.local.putCase(merged);
+      return ok(merged);
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('No se pudo reasignar el caso', e));
     }
   }
 

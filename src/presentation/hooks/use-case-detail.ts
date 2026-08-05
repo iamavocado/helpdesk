@@ -20,6 +20,8 @@ interface CaseDetailData {
   uploadingFor: number | null;
   addComment: (input: Omit<NewCommentInput, 'caseId'>) => Promise<boolean>;
   uploadAttachment: (commentServerId: number, file: FileToUpload) => Promise<boolean>;
+  /** Recarga el caso y su conversación (p. ej. tras reasignar). */
+  reload: () => Promise<void>;
 }
 
 /** Carga un caso y su conversación; permite agregar comentarios (offline-first). */
@@ -52,18 +54,20 @@ export function useCaseDetail(caseId: string): CaseDetailData {
     [commentRepository],
   );
 
-  useEffect(() => {
-    void (async () => {
-      setLoading(true);
-      const caseResult = await caseRepository.getById(caseId);
-      const current = isOk(caseResult) ? caseResult.value : null;
-      if (current) setCaseItem(current);
-      await commentRepository.refresh(caseId);
-      await loadComments();
-      setLoading(false);
-      await loadAttachments(current?.serverId); // en segundo plano: no bloquea la pantalla
-    })();
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    const caseResult = await caseRepository.getById(caseId);
+    const current = isOk(caseResult) ? caseResult.value : null;
+    if (current) setCaseItem(current);
+    await commentRepository.refresh(caseId);
+    await loadComments();
+    setLoading(false);
+    await loadAttachments(current?.serverId); // en segundo plano: no bloquea la pantalla
   }, [caseRepository, commentRepository, caseId, loadComments, loadAttachments]);
+
+  useEffect(() => {
+    void loadAll();
+  }, [loadAll]);
 
   const addComment = useCallback(
     async (input: Omit<NewCommentInput, 'caseId'>): Promise<boolean> => {
@@ -110,5 +114,6 @@ export function useCaseDetail(caseId: string): CaseDetailData {
     uploadingFor,
     addComment,
     uploadAttachment,
+    reload: loadAll,
   };
 }

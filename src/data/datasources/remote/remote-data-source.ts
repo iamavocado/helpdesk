@@ -8,19 +8,25 @@ import {
 import type {
   Attachment,
   Case,
+  CatalogItem,
   Catalogs,
   Comment,
   FileToUpload,
+  Member,
   NewCaseInput,
   NewCommentInput,
+  ReassignInput,
 } from '@/domain';
+import { classificationIdFromStatus } from '@/domain';
 import { ApiError, type ApiClient, type GetCasesParams } from '@/services/api';
 
+import type { UpdateCaseDto } from './dto';
 import {
   catalogsDtoToDomain,
   dtoToAttachment,
   dtoToCase,
   dtoToComment,
+  dtoToMember,
   newCaseToCreateDto,
   newCommentToCreateDto,
 } from './mappers';
@@ -54,6 +60,9 @@ export interface RemoteDataSource {
   fetchComments(caseServerId: number, caseLocalId: string): Promise<Comment[]>;
   createComment(input: NewCommentInput, caseServerId: number): Promise<Comment>;
   fetchCatalogs(): Promise<Catalogs>;
+  fetchMembers(department: string, jfg: string): Promise<Member[]>;
+  fetchStatusCaseSubStatuses(): Promise<CatalogItem[]>;
+  updateCase(current: Case, input: ReassignInput): Promise<Case>;
   fetchAttachments(caseServerId: number): Promise<Attachment[]>;
   uploadAttachment(
     commentServerId: number,
@@ -116,6 +125,56 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   async fetchCatalogs(): Promise<Catalogs> {
     try {
       return catalogsDtoToDomain(await this.api.getCatalogs());
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchMembers(department: string, jfg: string): Promise<Member[]> {
+    try {
+      return (await this.api.getMembers(department, jfg)).map(dtoToMember);
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchStatusCaseSubStatuses(): Promise<CatalogItem[]> {
+    try {
+      return (await this.api.getStatusCaseSubStatuses()).map((c) => ({
+        id: c.Id,
+        description: c.Description ?? '',
+        enable: c.Enable ?? true,
+      }));
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async updateCase(current: Case, input: ReassignInput): Promise<Case> {
+    if (current.serverId == null) {
+      throw new ApiError(0, 'El caso aún no está sincronizado (sin serverId)');
+    }
+    // Se parte de los valores actuales y se sobreescriben los que cambian, para
+    // no borrar campos que el PUT no debe tocar.
+    const statusCaseId = input.statusCaseId ?? current.statusCaseId;
+    const dto: UpdateCaseDto = {
+      Id: current.serverId,
+      UserRequester: current.userRequester,
+      EmailRequester: current.requesterEmail,
+      StatusCaseId: statusCaseId,
+      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
+      PriorityId: current.priorityId,
+      ServiceTypeId: input.serviceTypeId ?? current.serviceTypeId,
+      EquipmentTypeId: input.equipmentTypeId ?? current.equipmentTypeId,
+      Location: current.location,
+      CaseDetails: input.caseDetails ?? current.caseDetails,
+      Technician: input.technician,
+      SubStatusCaseId: current.subStatusId,
+      StatusCaseSubStatusId: input.statusCaseSubStatusId ?? null,
+      StatusCaseSubStatusDesc: input.statusCaseSubStatusDesc ?? null,
+    };
+    try {
+      return dtoToCase(await this.api.updateCase(dto));
     } catch (e) {
       throw toDomainError(e);
     }

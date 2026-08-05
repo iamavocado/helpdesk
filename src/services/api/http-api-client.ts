@@ -9,6 +9,8 @@ import type {
   CreateCaseDto,
   CreateCommentDto,
   LoginRequestDto,
+  MemberDto,
+  UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
 
@@ -103,6 +105,18 @@ interface ApiAttachment {
   idCase: number;
   attachedFile: string | null;
 }
+
+interface ApiMember {
+  userFullName: string | null;
+  userName: string | null;
+  emailAddress: string | null;
+  jobFunction: string | null;
+}
+
+/** Parámetros fijos del directorio Ultimus para el select "Asignar a". */
+const ULTIMUS_DEPARTMENT = 'HelpDesk';
+const ULTIMUS_JFG = 'Soporte';
+const ULTIMUS_VERSION = 'V8';
 
 interface ApiCatalogItem {
   id: number;
@@ -273,6 +287,55 @@ export class HttpApiClient implements ApiClient {
       }),
     });
     return this.detailToCaseDto(d);
+  }
+
+  async getMembers(department: string, jfg: string): Promise<MemberDto[]> {
+    const q = new URLSearchParams();
+    q.set('department', department || ULTIMUS_DEPARTMENT);
+    q.set('jfg', jfg || ULTIMUS_JFG);
+    q.set('ultimus_version', ULTIMUS_VERSION);
+    const list = await this.authed<ApiMember[]>(`/api/ultimus-user-members?${q.toString()}`);
+    return (list ?? []).map((m) => ({
+      UserFullName: m.userFullName ?? m.userName ?? '',
+      UserName: m.userName ?? '',
+      EmailAddress: m.emailAddress,
+      JobFunction: m.jobFunction,
+    }));
+  }
+
+  async getStatusCaseSubStatuses(): Promise<CatalogItemDto[]> {
+    const list = await this.authed<ApiCatalogItem[]>('/api/StatusCaseSubStatus/todos');
+    return (list ?? []).map((c) => ({
+      Id: c.id,
+      Description: c.description ?? c.name ?? '',
+      Enable: c.enable ?? true,
+    }));
+  }
+
+  async updateCase(dto: UpdateCaseDto): Promise<CaseDto> {
+    await this.authed<unknown>(`/api/Case/${dto.Id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        id: dto.Id,
+        userRequester: dto.UserRequester,
+        statusCaseId: dto.StatusCaseId,
+        classificationCaseId: dto.ClassificationCaseId,
+        priorityId: dto.PriorityId,
+        serviceTypeId: dto.ServiceTypeId,
+        equipmentTypeId: dto.EquipmentTypeId,
+        serial: dto.Serial,
+        location: dto.Location,
+        caseDetails: dto.CaseDetails,
+        technician: dto.Technician,
+        emailRequester: dto.EmailRequester,
+        subStatusCaseId: dto.SubStatusCaseId,
+        statusCaseSubStatusId: dto.StatusCaseSubStatusId,
+        statusCaseSubStatusDesc: dto.StatusCaseSubStatusDesc,
+        solutionDate: dto.SolutionDate,
+      }),
+    });
+    // El PUT puede no devolver el caso completo: se re-lee para datos frescos.
+    return this.getCase(dto.Id);
   }
 
   /**

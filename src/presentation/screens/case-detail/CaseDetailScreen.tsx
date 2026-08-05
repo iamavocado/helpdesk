@@ -35,6 +35,8 @@ export interface CaseDetailScreenProps {
   onSubmitComment: (input: Omit<NewCommentInput, 'caseId'>) => void;
   /** Pide elegir un archivo y subirlo al comentario indicado. */
   onPickAttachment?: (commentServerId: number) => void;
+  /** Abre el modal de reasignación del caso. */
+  onReassign?: () => void;
 }
 
 const STATUS_OPTIONS = [
@@ -153,6 +155,7 @@ export function CaseDetailScreen({
   onBack,
   onSubmitComment,
   onPickAttachment,
+  onReassign,
 }: CaseDetailScreenProps) {
   const [draft, setDraft] = useState<CommentDraft>({
     body: '',
@@ -344,6 +347,14 @@ export function CaseDetailScreen({
           onPress={submit}
           disabled={submitting}
         />
+        {onReassign && caseItem.serverId != null ? (
+          <Button
+            title="Reasignar"
+            variant="secondary"
+            onPress={onReassign}
+            style={styles.reassignBtn}
+          />
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -454,4 +465,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     marginBottom: spacing.md,
   },
+  reassignBtn: { marginTop: spacing.lg },
 });

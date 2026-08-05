@@ -1,5 +1,13 @@
 import { serverLocalId } from '@/core/utils/id';
-import type { Attachment, Case, Catalogs, Comment, NewCaseInput, NewCommentInput } from '@/domain';
+import type {
+  Attachment,
+  Case,
+  Catalogs,
+  Comment,
+  Member,
+  NewCaseInput,
+  NewCommentInput,
+} from '@/domain';
 import { classificationFromId } from '@/domain';
 
 import type {
@@ -10,6 +18,7 @@ import type {
   CommentDto,
   CreateCaseDto,
   CreateCommentDto,
+  MemberDto,
   PriorityDto,
 } from './dto';
 
@@ -81,6 +90,16 @@ export function dtoToAttachment(dto: AttachmentDto): Attachment {
     commentServerId: dto.IdCaseComment,
     caseServerId: dto.IdCase,
     fileName: dto.AttachedFile ?? '',
+  };
+}
+
+/** DTO de persona asignable → dominio. */
+export function dtoToMember(dto: MemberDto): Member {
+  return {
+    fullName: dto.UserFullName,
+    userName: dto.UserName,
+    email: dto.EmailAddress,
+    jobFunction: dto.JobFunction,
   };
 }
 

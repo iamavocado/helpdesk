@@ -10,6 +10,7 @@ const baseProps = {
   catalogs,
   userName: 'Saulo Bravo',
   userEmail: 'saulo@ita-sa.com',
+  requesterUsername: 'sbravo',
   onCancel: jest.fn(),
   onSubmit: jest.fn(),
 };

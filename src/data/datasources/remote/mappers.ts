@@ -144,6 +144,8 @@ export function newCaseToCreateDto(input: NewCaseInput): CreateCaseDto {
     PriorityDesc: input.priorityDesc ?? null,
     CaseDetails: input.caseDetails,
     Client: input.client ?? null,
+    UserRequester: input.userRequester ?? null,
+    EmailRequester: input.emailRequester ?? null,
     ReportingUser: input.reportingUser ?? null,
     ReportingUserEmail: input.reportingUserEmail ?? null,
     Location: input.location ?? null,

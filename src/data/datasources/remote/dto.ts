@@ -66,6 +66,8 @@ export interface CreateCaseDto {
   PriorityDesc?: string | null;
   CaseDetails: string;
   Client?: string | null;
+  UserRequester?: string | null;
+  EmailRequester?: string | null;
   ReportingUser?: string | null;
   ReportingUserEmail?: string | null;
   Location?: string | null;

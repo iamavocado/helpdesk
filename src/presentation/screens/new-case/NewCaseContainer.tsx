@@ -21,6 +21,7 @@ export function NewCaseContainer() {
       loadDepartments={loadDepartments}
       userName={user?.name ?? 'Usuario'}
       userEmail={user?.email ?? ''}
+      requesterUsername={user?.username ?? ''}
       submitting={submitting}
       onCancel={() => navigation.goBack()}
       onSubmit={async (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => {

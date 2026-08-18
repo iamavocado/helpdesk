@@ -43,6 +43,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     const container = getContainer();
+    // Empuja lo pendiente ANTES de invalidar el token y limpiar la caché, para no
+    // perder casos/comentarios creados sin sincronizar. Tolerante a falta de red.
+    try {
+      await container.syncEngine.drain();
+    } catch {
+      // sin conexión: se limpia igualmente (compromiso de seguridad: no dejar datos)
+    }
     await container.logoutUseCase.execute();
     await container.local.clear(); // no dejar datos del usuario anterior en el dispositivo
     set({ user: null, status: 'unauthenticated', error: null });

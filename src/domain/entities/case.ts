@@ -74,6 +74,9 @@ export interface NewCaseInput {
   priorityDesc?: string | null;
   caseDetails: string;
   client?: string | null;
+  /** Solicitante = username de login. La API lo exige y filtra los casos por él. */
+  userRequester?: string | null;
+  emailRequester?: string | null;
   reportingUser?: string | null;
   reportingUserEmail?: string | null;
   location?: string | null;

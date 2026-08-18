@@ -281,6 +281,8 @@ export class HttpApiClient implements ApiClient {
         priorityId: dto.PriorityId,
         caseDetails: dto.CaseDetails,
         client: dto.Client,
+        userRequester: dto.UserRequester,
+        emailRequester: dto.EmailRequester,
         reportingUser: dto.ReportingUser,
         reportingUserEmail: dto.ReportingUserEmail,
         location: dto.Location,

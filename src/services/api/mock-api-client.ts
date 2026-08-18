@@ -118,8 +118,8 @@ export class MockApiClient implements ApiClient {
     const nowIso = new Date().toISOString();
     const created: CaseDto = {
       Id: id,
-      UserRequester: dto.ReportingUser ?? 'Usuario',
-      EmailRequester: dto.ReportingUserEmail ?? null,
+      UserRequester: dto.UserRequester ?? dto.ReportingUser ?? 'Usuario',
+      EmailRequester: dto.EmailRequester ?? dto.ReportingUserEmail ?? null,
       ReportingUser: dto.ReportingUser ?? null,
       ReportingUserEmail: dto.ReportingUserEmail ?? null,
       CreationDate: nowIso,

@@ -21,6 +21,8 @@ export interface NewCaseScreenProps {
   loadDepartments?: (idCountry: number) => Promise<CatalogItem[]>;
   userName: string;
   userEmail: string;
+  /** Username de login: la API lo exige como solicitante y filtra los casos por él. */
+  requesterUsername: string;
   submitting?: boolean;
   onCancel: () => void;
   onSubmit: (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => void;
@@ -66,6 +68,7 @@ export function NewCaseScreen({
   loadDepartments,
   userName,
   userEmail,
+  requesterUsername,
   submitting = false,
   onCancel,
   onSubmit,
@@ -142,6 +145,8 @@ export function NewCaseScreen({
       equipmentTypeDesc: descById(catalogs.equipmentTypes, draft.equipmentTypeId) ?? '',
       caseDetails,
       client: draft.client || null,
+      userRequester: requesterUsername,
+      emailRequester: userEmail || null,
       reportingUser: draft.reportingUser || null,
       reportingUserEmail: draft.endUserEmail || null,
       softwareModuleId: isSoftware ? (draft.moduleId ?? null) : null,

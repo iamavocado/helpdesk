@@ -12,11 +12,13 @@ import { NewCaseScreen } from './NewCaseScreen';
 export function NewCaseContainer() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const user = useAuthStore((s) => s.user);
-  const { catalogs, submitting, submit } = useNewCase();
+  const { catalogs, countries, submitting, loadDepartments, submit } = useNewCase();
 
   return (
     <NewCaseScreen
       catalogs={catalogs}
+      countries={countries}
+      loadDepartments={loadDepartments}
       userName={user?.name ?? 'Usuario'}
       userEmail={user?.email ?? ''}
       submitting={submitting}

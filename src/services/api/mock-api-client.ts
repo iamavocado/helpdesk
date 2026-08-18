@@ -145,11 +145,33 @@ export class MockApiClient implements ApiClient {
       Technician: null,
       Location: dto.Location ?? null,
       Client: dto.Client ?? null,
-      CountryDesc: null,
-      DepartmentDesc: null,
+      CountryDesc: dto.CountryDesc ?? null,
+      DepartmentDesc: dto.DepartmentDesc ?? null,
     };
     this.cases.push(created);
     return created;
+  }
+
+  async getCountries(): Promise<CatalogItemDto[]> {
+    await this.delay();
+    return [{ Id: 1, Description: 'PANAMÁ', Enable: true }];
+  }
+
+  async getDepartments(idCountry: number): Promise<CatalogItemDto[]> {
+    await this.delay();
+    if (idCountry !== 1) return [];
+    return [
+      'BOCAS DEL TORO',
+      'COCLÉ',
+      'COLÓN',
+      'CHIRIQUÍ',
+      'DARIÉN',
+      'HERRERA',
+      'LOS SANTOS',
+      'PANAMÁ',
+      'VERAGUAS',
+      'PANAMÁ OESTE',
+    ].map((description, i) => ({ Id: i + 1, Description: description, Enable: true }));
   }
 
   async getComments(caseServerId: number): Promise<CommentDto[]> {

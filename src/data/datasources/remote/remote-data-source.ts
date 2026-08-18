@@ -60,6 +60,8 @@ export interface RemoteDataSource {
   fetchComments(caseServerId: number, caseLocalId: string): Promise<Comment[]>;
   createComment(input: NewCommentInput, caseServerId: number): Promise<Comment>;
   fetchCatalogs(): Promise<Catalogs>;
+  fetchCountries(): Promise<CatalogItem[]>;
+  fetchDepartments(idCountry: number): Promise<CatalogItem[]>;
   fetchMembers(department: string, jfg: string): Promise<Member[]>;
   fetchStatusCaseSubStatuses(): Promise<CatalogItem[]>;
   updateCase(current: Case, input: ReassignInput): Promise<Case>;
@@ -125,6 +127,30 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   async fetchCatalogs(): Promise<Catalogs> {
     try {
       return catalogsDtoToDomain(await this.api.getCatalogs());
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchCountries(): Promise<CatalogItem[]> {
+    try {
+      return (await this.api.getCountries()).map((c) => ({
+        id: c.Id,
+        description: c.Description ?? '',
+        enable: c.Enable ?? true,
+      }));
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchDepartments(idCountry: number): Promise<CatalogItem[]> {
+    try {
+      return (await this.api.getDepartments(idCountry)).map((c) => ({
+        id: c.Id,
+        description: c.Description ?? '',
+        enable: c.Enable ?? true,
+      }));
     } catch (e) {
       throw toDomainError(e);
     }

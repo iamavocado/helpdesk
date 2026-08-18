@@ -58,6 +58,8 @@ describe('CaseRepositoryImpl (offline-first)', () => {
       fetchMembers: () => Promise.reject(networkError()),
       fetchStatusCaseSubStatuses: () => Promise.reject(networkError()),
       updateCase: () => Promise.reject(networkError()),
+      fetchCountries: () => Promise.reject(networkError()),
+      fetchDepartments: () => Promise.reject(networkError()),
     };
     const repo = new CaseRepositoryImpl(local, offlineRemote);
     const result = await repo.refresh();

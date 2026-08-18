@@ -147,6 +147,10 @@ export function newCaseToCreateDto(input: NewCaseInput): CreateCaseDto {
     ReportingUser: input.reportingUser ?? null,
     ReportingUserEmail: input.reportingUserEmail ?? null,
     Location: input.location ?? null,
+    CountryId: input.countryId ?? null,
+    CountryDesc: input.countryDesc ?? null,
+    DepartmentId: input.departmentId ?? null,
+    DepartmentDesc: input.departmentDesc ?? null,
   };
 }
 

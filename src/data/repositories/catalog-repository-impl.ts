@@ -1,5 +1,12 @@
 import { DomainError, unknownError } from '@/core/errors';
-import { ok, err, type Catalogs, type CatalogRepository, type Result } from '@/domain';
+import {
+  ok,
+  err,
+  type CatalogItem,
+  type Catalogs,
+  type CatalogRepository,
+  type Result,
+} from '@/domain';
 
 import type { LocalDataSource } from '../datasources/local';
 import type { RemoteDataSource } from '../datasources/remote';
@@ -30,6 +37,26 @@ export class CatalogRepositoryImpl implements CatalogRepository {
       return ok(undefined);
     } catch (e) {
       return err(e instanceof DomainError ? e : unknownError('Fallo al refrescar catálogos', e));
+    }
+  }
+
+  async getCountries(): Promise<Result<CatalogItem[], DomainError>> {
+    try {
+      return ok(await this.remote.fetchCountries());
+    } catch (e) {
+      return err(
+        e instanceof DomainError ? e : unknownError('No se pudieron cargar los países', e),
+      );
+    }
+  }
+
+  async getDepartments(idCountry: number): Promise<Result<CatalogItem[], DomainError>> {
+    try {
+      return ok(await this.remote.fetchDepartments(idCountry));
+    } catch (e) {
+      return err(
+        e instanceof DomainError ? e : unknownError('No se pudieron cargar las provincias', e),
+      );
     }
   }
 }

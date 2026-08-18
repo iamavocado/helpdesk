@@ -44,6 +44,11 @@ export interface ApiClient {
   addComment(dto: CreateCommentDto): Promise<CommentDto>;
   getCatalogs(): Promise<CatalogsDto>;
 
+  /** Países (para el select País). */
+  getCountries(): Promise<CatalogItemDto[]>;
+  /** Provincias/departamentos de un país (requiere idCountry). */
+  getDepartments(idCountry: number): Promise<CatalogItemDto[]>;
+
   /** Personas asignables (para el select "Asignar a" del modal de reasignación). */
   getMembers(department: string, jfg: string): Promise<MemberDto[]>;
   /** Subestados detallados (StatusCaseSubStatus: En desarrollo, En validación…). */

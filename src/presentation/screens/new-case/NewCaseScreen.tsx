@@ -16,6 +16,9 @@ import {
 
 export interface NewCaseScreenProps {
   catalogs: Catalogs | null;
+  countries?: CatalogItem[];
+  /** Carga las provincias/departamentos de un país (select dependiente). */
+  loadDepartments?: (idCountry: number) => Promise<CatalogItem[]>;
   userName: string;
   userEmail: string;
   submitting?: boolean;
@@ -59,6 +62,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
  */
 export function NewCaseScreen({
   catalogs,
+  countries = [],
+  loadDepartments,
   userName,
   userEmail,
   submitting = false,
@@ -77,11 +82,21 @@ export function NewCaseScreen({
     hardwareEquipmentId: undefined,
     priorityId: undefined,
     serviceTypeId: undefined,
+    countryId: undefined,
+    departmentId: undefined,
     referenceNumber: '',
     location: '',
     caseDetails: '',
   });
   const [errors, setErrors] = useState<NewCaseErrors>({});
+  const [departments, setDepartments] = useState<CatalogItem[]>([]);
+
+  // Al elegir país: carga sus provincias/departamentos y limpia la selección previa.
+  const onCountryChange = async (countryId: number): Promise<void> => {
+    setDraft((d) => ({ ...d, countryId, departmentId: undefined }));
+    setDepartments([]);
+    if (loadDepartments) setDepartments(await loadDepartments(countryId));
+  };
   const [commentBody, setCommentBody] = useState('');
   const [commentPrivate, setCommentPrivate] = useState(false);
   const [commentStatus, setCommentStatus] = useState({
@@ -144,6 +159,10 @@ export function NewCaseScreen({
       serviceTypeId: draft.serviceTypeId ?? null,
       serviceTypeDesc: descById(catalogs.serviceTypes, draft.serviceTypeId),
       location: draft.location || null,
+      countryId: draft.countryId ?? null,
+      countryDesc: descById(countries, draft.countryId),
+      departmentId: draft.departmentId ?? null,
+      departmentDesc: descById(departments, draft.departmentId),
     };
 
     const initialComment = commentBody.trim()
@@ -272,6 +291,20 @@ export function NewCaseScreen({
           placeholder="Opcional"
           value={draft.referenceNumber}
           onChangeText={(v) => set('referenceNumber', v)}
+        />
+        <Select
+          label="País"
+          placeholder="Seleccionar..."
+          value={draft.countryId}
+          options={toOptions(countries)}
+          onChange={(value) => void onCountryChange(value)}
+        />
+        <Select
+          label="Provincia o Departamento"
+          placeholder={draft.countryId ? 'Seleccionar...' : 'Primero elige un país'}
+          value={draft.departmentId}
+          options={toOptions(departments)}
+          onChange={(value) => set('departmentId', value)}
         />
         <Input
           label="Ubicación"

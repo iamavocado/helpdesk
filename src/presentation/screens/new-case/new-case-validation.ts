@@ -10,6 +10,8 @@ export interface NewCaseDraft {
   hardwareEquipmentId: number | undefined;
   priorityId: number | undefined;
   serviceTypeId: number | undefined;
+  countryId: number | undefined;
+  departmentId: number | undefined;
   referenceNumber: string;
   location: string;
   caseDetails: string;

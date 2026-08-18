@@ -77,6 +77,10 @@ export interface NewCaseInput {
   reportingUser?: string | null;
   reportingUserEmail?: string | null;
   location?: string | null;
+  countryId?: number | null;
+  countryDesc?: string | null;
+  departmentId?: number | null;
+  departmentDesc?: string | null;
 }
 
 /**

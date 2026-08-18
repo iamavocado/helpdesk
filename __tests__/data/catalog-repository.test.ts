@@ -38,6 +38,8 @@ describe('CatalogRepositoryImpl', () => {
       fetchMembers: () => Promise.reject(networkError()),
       fetchStatusCaseSubStatuses: () => Promise.reject(networkError()),
       updateCase: () => Promise.reject(networkError()),
+      fetchCountries: () => Promise.reject(networkError()),
+      fetchDepartments: () => Promise.reject(networkError()),
     };
     const repo = new CatalogRepositoryImpl(local, offline);
     const result = await repo.getAll();

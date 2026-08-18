@@ -69,6 +69,10 @@ export interface CreateCaseDto {
   ReportingUser?: string | null;
   ReportingUserEmail?: string | null;
   Location?: string | null;
+  CountryId?: number | null;
+  CountryDesc?: string | null;
+  DepartmentId?: number | null;
+  DepartmentDesc?: string | null;
 }
 
 /** Persona asignable (GET /api/ultimus-user-members). */

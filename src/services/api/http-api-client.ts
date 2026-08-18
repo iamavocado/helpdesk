@@ -284,9 +284,32 @@ export class HttpApiClient implements ApiClient {
         reportingUser: dto.ReportingUser,
         reportingUserEmail: dto.ReportingUserEmail,
         location: dto.Location,
+        countryId: dto.CountryId,
+        departmentId: dto.DepartmentId,
       }),
     });
     return this.detailToCaseDto(d);
+  }
+
+  async getCountries(): Promise<CatalogItemDto[]> {
+    const list = await this.authed<ApiCatalogItem[]>('/api/Country/todos');
+    return (list ?? []).map((c) => ({
+      Id: c.id,
+      Description: c.description ?? c.name ?? '',
+      Enable: c.enable ?? true,
+    }));
+  }
+
+  async getDepartments(idCountry: number): Promise<CatalogItemDto[]> {
+    const q = new URLSearchParams();
+    q.set('idCountry', String(idCountry));
+    q.set('ordenarPor', 'description');
+    const list = await this.authed<ApiCatalogItem[]>(`/api/Department/todos?${q.toString()}`);
+    return (list ?? []).map((c) => ({
+      Id: c.id,
+      Description: c.description ?? c.name ?? '',
+      Enable: c.enable ?? true,
+    }));
   }
 
   async getMembers(department: string, jfg: string): Promise<MemberDto[]> {

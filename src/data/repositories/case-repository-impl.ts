@@ -57,8 +57,8 @@ export class CaseRepositoryImpl implements CaseRepository {
     const newCase: Case = {
       id,
       serverId: null,
-      userRequester: input.reportingUser ?? '',
-      requesterEmail: input.reportingUserEmail ?? null,
+      userRequester: input.userRequester ?? input.reportingUser ?? '',
+      requesterEmail: input.emailRequester ?? input.reportingUserEmail ?? null,
       reportingUser: input.reportingUser ?? null,
       reportingUserEmail: input.reportingUserEmail ?? null,
       creationDate: timestamp,

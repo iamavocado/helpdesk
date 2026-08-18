@@ -3,6 +3,7 @@ import { classificationFromId } from '@/domain';
 
 import type { PendingOperation } from '../../sync/pending-operation';
 import type { LocalDataSource } from './local-data-source';
+import { mergeServerCase } from './merge-case';
 
 /**
  * Implementación en memoria de LocalDataSource.
@@ -27,9 +28,11 @@ export class InMemoryLocalDataSource implements LocalDataSource {
   async upsertCases(cases: Case[]): Promise<void> {
     for (const incoming of cases) {
       const existing = this.indexByServerId(incoming.serverId);
-      // Upsert por serverId: conserva el id local si ya existía.
+      // Upsert por serverId: conserva el id local y mezcla los campos que la
+      // lista liviana del servidor no trae (taxonomía, país/provincia…).
       const id = existing?.id ?? incoming.id;
-      this.cases.set(id, { ...incoming, id });
+      const row = existing ? mergeServerCase(existing, { ...incoming, id }) : { ...incoming, id };
+      this.cases.set(id, row);
       if (existing && existing.id !== incoming.id) this.cases.delete(incoming.id);
     }
   }

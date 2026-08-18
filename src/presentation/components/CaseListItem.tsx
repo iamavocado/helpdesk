@@ -12,12 +12,16 @@ export interface CaseListItemProps {
 
 /** Tarjeta de caso para listas (Home y Lista), con franja y badge de estado. */
 export function CaseListItem({ item, onPress, now }: CaseListItemProps) {
+  // El servidor puede tardar en rellenar la taxonomía de un caso nuevo: si aún no
+  // hay categoría/servicio, se muestra el asunto (primera línea del detalle).
+  const derived = caseTitle(item).trim();
+  const title = derived || item.caseDetails.split('\n')[0].trim() || 'Caso sin categoría';
   const meta = [item.equipmentTypeDesc, timeAgo(item.creationDate, now)].filter(Boolean);
   return (
     <Card
       statusStripe={item.classification}
       onPress={() => onPress(item.id)}
-      accessibilityLabel={caseTitle(item)}
+      accessibilityLabel={title}
       style={styles.card}
     >
       <View style={styles.header}>
@@ -26,7 +30,7 @@ export function CaseListItem({ item, onPress, now }: CaseListItemProps) {
             {item.serverId != null ? `Caso #${item.serverId}` : 'Pendiente de número'}
           </Text>
           <Text variant="bodyStrong" color={colors.ink} numberOfLines={2}>
-            {caseTitle(item)}
+            {title}
           </Text>
         </View>
         <Badge status={item.classification} label={classificationLabel(item.classification)} />

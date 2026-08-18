@@ -4,6 +4,7 @@ import type { Case, Catalogs, Comment, ListCasesParams, PagedCases } from '@/dom
 
 import type { PendingOperation } from '../../sync/pending-operation';
 import type { LocalDataSource } from './local-data-source';
+import { mergeServerCase } from './merge-case';
 
 /**
  * Implementación persistente de LocalDataSource con expo-sqlite (funciona en
@@ -71,14 +72,18 @@ export class SqliteLocalDataSource implements LocalDataSource {
     for (const incoming of cases) {
       let row = incoming;
       if (incoming.serverId != null) {
-        const existing = await db.getFirstAsync<{ id: string }>(
-          'SELECT id FROM cases WHERE server_id = ? LIMIT 1',
+        const existing = await db.getFirstAsync<{ id: string; data: string }>(
+          'SELECT id, data FROM cases WHERE server_id = ? LIMIT 1',
           [incoming.serverId],
         );
-        // Upsert por serverId: conserva el id local existente.
-        if (existing && existing.id !== incoming.id) {
-          row = { ...incoming, id: existing.id };
-          await db.runAsync('DELETE FROM cases WHERE id = ?', [incoming.id]);
+        if (existing) {
+          // Upsert por serverId: conserva el id local y mezcla los campos que la
+          // lista liviana del servidor no trae (taxonomía, país/provincia…).
+          const prev = JSON.parse(existing.data) as Case;
+          row = mergeServerCase(prev, { ...incoming, id: existing.id });
+          if (existing.id !== incoming.id) {
+            await db.runAsync('DELETE FROM cases WHERE id = ?', [incoming.id]);
+          }
         }
       }
       await this.putCase(row);

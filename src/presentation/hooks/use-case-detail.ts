@@ -26,7 +26,7 @@ interface CaseDetailData {
 
 /** Carga un caso y su conversación; permite agregar comentarios (offline-first). */
 export function useCaseDetail(caseId: string): CaseDetailData {
-  const { caseRepository, commentRepository } = getContainer();
+  const { caseRepository, commentRepository, syncEngine } = getContainer();
   const [caseItem, setCaseItem] = useState<Case | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [attachments, setAttachments] = useState<Record<number, Attachment[]>>({});
@@ -84,11 +84,13 @@ export function useCaseDetail(caseId: string): CaseDetailData {
           if (isOk(updated)) setCaseItem(updated.value);
         }
         await loadComments();
+        // Empuja el comentario al servidor de inmediato (si hay red).
+        await syncEngine.drain();
       }
       setSubmitting(false);
       return isOk(result);
     },
-    [commentRepository, caseRepository, caseId, loadComments],
+    [commentRepository, caseRepository, caseId, loadComments, syncEngine],
   );
 
   /** Sube un archivo a un comentario ya sincronizado y recarga los adjuntos. */

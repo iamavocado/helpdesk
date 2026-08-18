@@ -1,8 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 
 import { env } from '@/core/config/env';
+import { getContainer } from '@/core/di';
 import { InactivityTimer } from '@/data/security';
 import { colors } from '@/design-system';
 import { CaseDetailContainer } from '@/presentation/screens/case-detail';
@@ -29,6 +30,17 @@ function InactivityGate({ children }: { children: ReactNode }) {
     timer.touch();
     return () => timer.stop();
   }, [timer]);
+
+  // Sincroniza la cola pendiente al autenticarse y cada vez que la app vuelve a
+  // primer plano (drena lo que quedó offline). Event-driven: sin temporizadores.
+  useEffect(() => {
+    const drain = () => void getContainer().syncEngine.drain();
+    drain();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') drain();
+    });
+    return () => sub.remove();
+  }, []);
 
   return (
     <View style={styles.fill} onTouchStart={() => ref.current.touch()}>

@@ -15,7 +15,7 @@ import {
   type Result,
 } from '@/domain';
 
-import type { LocalDataSource } from '../datasources/local';
+import { mergeServerCase, type LocalDataSource } from '../datasources/local';
 import type { RemoteDataSource } from '../datasources/remote';
 import type { PendingOperation } from '../sync';
 
@@ -119,7 +119,8 @@ export class CaseRepositoryImpl implements CaseRepository {
       const existing = await this.local.getCaseById(id);
       if (!existing) return err(notFoundError(`Caso ${id} no encontrado`));
       const classificationId = classificationIdFromStatus(statusCaseId);
-      const updated: Case = {
+      // Aplica el nuevo estado sobre los datos actuales (conserva técnico, etc.).
+      const withStatus: Case = {
         ...existing,
         statusCaseId,
         statusCaseDesc,
@@ -127,10 +128,37 @@ export class CaseRepositoryImpl implements CaseRepository {
         classification: classificationFromId(classificationId),
         modificationDate: this.now(),
       };
-      await this.local.putCase(updated);
-      return ok(updated);
+
+      // Si el caso ya está sincronizado, persiste el estado en el servidor con un
+      // PUT /api/Case (el backend no cambia el estado desde el comentario).
+      if (existing.serverId != null) {
+        const updated = await this.remote.updateCase(existing, {
+          technician: existing.technician ?? '',
+          statusCaseId,
+          statusCaseDesc,
+        });
+        // El servidor puede devolver descripciones vacías tras el PUT: se mezcla
+        // para conservar la taxonomía local y se fuerza el estado elegido.
+        const merged = mergeServerCase(existing, { ...updated, id: existing.id });
+        const saved: Case = {
+          ...merged,
+          statusCaseId,
+          statusCaseDesc: statusCaseDesc || merged.statusCaseDesc,
+          classificationId,
+          classification: classificationFromId(classificationId),
+          syncStatus: 'synced',
+        };
+        await this.local.putCase(saved);
+        return ok(saved);
+      }
+
+      // Caso aún sin serverId: se guarda local (se reflejará al sincronizar).
+      await this.local.putCase(withStatus);
+      return ok(withStatus);
     } catch (e) {
-      return err(unknownError('No se pudo actualizar el estado del caso', e));
+      return err(
+        e instanceof DomainError ? e : unknownError('No se pudo actualizar el estado del caso', e),
+      );
     }
   }
 
@@ -156,8 +184,9 @@ export class CaseRepositoryImpl implements CaseRepository {
         return err(unknownError('El caso aún no está sincronizado; no se puede reasignar'));
       }
       const updated = await this.remote.updateCase(local, input);
-      // El servidor manda: se refleja tal cual en local (conserva el id local).
-      const merged: Case = { ...updated, id: local.id, syncStatus: 'synced' };
+      // Mezcla para conservar la taxonomía local si el servidor la devuelve vacía
+      // tras el PUT (conserva el id local y marca como sincronizado).
+      const merged = mergeServerCase(local, { ...updated, id: local.id, syncStatus: 'synced' });
       await this.local.putCase(merged);
       return ok(merged);
     } catch (e) {

@@ -44,6 +44,26 @@ describe('CaseRepositoryImpl (offline-first)', () => {
     expect(isOk(fromLocal) && fromLocal.value.total).toBe(1);
   });
 
+  it('updateStatus() de un caso sincronizado persiste el estado en el servidor', async () => {
+    const { repo, local } = setup();
+    await repo.refresh(); // llena local con casos del mock (con serverId)
+    const listed = await local.listCases({ page: 1, pageSize: 1 });
+    const target = listed.items[0];
+    expect(target.serverId).not.toBeNull();
+
+    const result = await repo.updateStatus(target.id, 3, 'Resuelto');
+    expect(isOk(result)).toBe(true);
+    if (!isOk(result)) return;
+    expect(result.value.statusCaseId).toBe(3);
+    expect(result.value.statusCaseDesc).toBe('Resuelto');
+    expect(result.value.classification).toBe('cerrado');
+    expect(result.value.syncStatus).toBe('synced');
+
+    // Persistió en local con el nuevo estado.
+    const reloaded = await local.getCaseById(target.id);
+    expect(reloaded?.statusCaseId).toBe(3);
+  });
+
   it('refresh() es tolerante a falta de red (no falla sin conexión)', async () => {
     const local = new InMemoryLocalDataSource();
     const offlineRemote: RemoteDataSource = {

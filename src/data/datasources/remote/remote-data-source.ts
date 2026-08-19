@@ -68,6 +68,7 @@ export interface RemoteDataSource {
   fetchMembers(department: string, jfg: string): Promise<Member[]>;
   fetchStatusCaseSubStatuses(): Promise<CatalogItem[]>;
   updateCase(current: Case, input: ReassignInput): Promise<Case>;
+  updateCaseStatus(current: Case, statusCaseId: number, statusCaseDesc: string): Promise<Case>;
   fetchAttachments(caseServerId: number): Promise<Attachment[]>;
   uploadAttachment(
     commentServerId: number,
@@ -201,6 +202,30 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       SubStatusCaseId: current.subStatusId,
       StatusCaseSubStatusId: input.statusCaseSubStatusId ?? null,
       StatusCaseSubStatusDesc: input.statusCaseSubStatusDesc ?? null,
+    };
+    try {
+      return dtoToCase(await this.api.updateCase(dto));
+    } catch (e) {
+      throw toDomainError(e);
+    }
+  }
+
+  /**
+   * Actualiza SOLO el estado con un PUT mínimo `{Id, UserRequester, StatusCaseId,
+   * ClassificationCaseId}`. El backend devuelve 500 si en el PUT se incluye toda
+   * la taxonomía al cerrar un caso (estado 4); el payload mínimo funciona para
+   * todos los estados (verificado en vivo). El resto de campos van `undefined`
+   * para que no se envíen.
+   */
+  async updateCaseStatus(current: Case, statusCaseId: number): Promise<Case> {
+    if (current.serverId == null) {
+      throw new ApiError(0, 'El caso aún no está sincronizado (sin serverId)');
+    }
+    const dto: UpdateCaseDto = {
+      Id: current.serverId,
+      UserRequester: current.userRequester,
+      StatusCaseId: statusCaseId,
+      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
     };
     try {
       return dtoToCase(await this.api.updateCase(dto));

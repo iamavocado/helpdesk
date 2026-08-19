@@ -47,7 +47,7 @@ export class CommentRepositoryImpl implements CommentRepository {
       caseServerId: parent?.serverId ?? null,
       body: input.body,
       creationDate: timestamp,
-      authorName: parent?.userRequester ?? '',
+      authorName: input.authorUsername ?? parent?.userRequester ?? '',
       authorRole: null,
       isPrivate: input.isPrivate,
       statusCaseId: input.statusCaseId ?? null,

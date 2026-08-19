@@ -10,6 +10,8 @@ import {
   type NewCommentInput,
 } from '@/domain';
 
+import { useAuthStore } from '@/presentation/stores';
+
 interface CaseDetailData {
   caseItem: Case | null;
   comments: Comment[];
@@ -27,6 +29,7 @@ interface CaseDetailData {
 /** Carga un caso y su conversación; permite agregar comentarios (offline-first). */
 export function useCaseDetail(caseId: string): CaseDetailData {
   const { caseRepository, commentRepository, syncEngine } = getContainer();
+  const authorUsername = useAuthStore((s) => s.user?.username ?? null);
   const [caseItem, setCaseItem] = useState<Case | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [attachments, setAttachments] = useState<Record<number, Attachment[]>>({});
@@ -72,7 +75,8 @@ export function useCaseDetail(caseId: string): CaseDetailData {
   const addComment = useCallback(
     async (input: Omit<NewCommentInput, 'caseId'>): Promise<boolean> => {
       setSubmitting(true);
-      const result = await commentRepository.add({ ...input, caseId });
+      // El autor = usuario de login; el backend lo guarda como userRequester.
+      const result = await commentRepository.add({ ...input, caseId, authorUsername });
       if (isOk(result)) {
         // Si el comentario lleva un estado, aplícalo también al caso (local).
         if (input.statusCaseId != null) {
@@ -90,7 +94,7 @@ export function useCaseDetail(caseId: string): CaseDetailData {
       setSubmitting(false);
       return isOk(result);
     },
-    [commentRepository, caseRepository, caseId, loadComments, syncEngine],
+    [commentRepository, caseRepository, caseId, loadComments, syncEngine, authorUsername],
   );
 
   /** Sube un archivo a un comentario ya sincronizado y recarga los adjuntos. */

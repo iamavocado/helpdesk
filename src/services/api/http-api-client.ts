@@ -386,6 +386,7 @@ export class HttpApiClient implements ApiClient {
         comment: dto.Comment,
         isPrivate: dto.IsPrivate,
         statusCaseId: dto.StatusCaseId,
+        userRequester: dto.UserRequester,
       }),
     });
     return this.commentToDto(c);

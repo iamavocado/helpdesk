@@ -132,11 +132,8 @@ export class CaseRepositoryImpl implements CaseRepository {
       // Si el caso ya está sincronizado, persiste el estado en el servidor con un
       // PUT /api/Case (el backend no cambia el estado desde el comentario).
       if (existing.serverId != null) {
-        const updated = await this.remote.updateCase(existing, {
-          technician: existing.technician ?? '',
-          statusCaseId,
-          statusCaseDesc,
-        });
+        // PUT mínimo (solo estado): el payload completo hace 500 al cerrar el caso.
+        const updated = await this.remote.updateCaseStatus(existing, statusCaseId, statusCaseDesc);
         // El servidor puede devolver descripciones vacías tras el PUT: se mezcla
         // para conservar la taxonomía local y se fuerza el estado elegido.
         const merged = mergeServerCase(existing, { ...updated, id: existing.id });

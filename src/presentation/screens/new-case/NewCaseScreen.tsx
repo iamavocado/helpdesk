@@ -176,6 +176,7 @@ export function NewCaseScreen({
           isPrivate: commentPrivate,
           statusCaseId: commentStatus.id,
           statusDesc: commentStatus.desc,
+          authorUsername: requesterUsername,
         }
       : undefined;
 

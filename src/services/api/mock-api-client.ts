@@ -197,7 +197,7 @@ export class MockApiClient implements ApiClient {
       StatusDesc: dto.StatusDesc ?? null,
       ClassificationCaseId: null,
       SubStatusCaseId: null,
-      UserRequester: 'Usuario',
+      UserRequester: dto.UserRequester ?? 'Usuario',
       IsPrivate: dto.IsPrivate,
       AttachedFile: null,
     };

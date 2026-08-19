@@ -166,6 +166,7 @@ export function newCommentToCreateDto(
     IsPrivate: input.isPrivate,
     StatusCaseId: input.statusCaseId ?? null,
     StatusDesc: input.statusDesc ?? null,
+    UserRequester: input.authorUsername ?? null,
   };
 }
 

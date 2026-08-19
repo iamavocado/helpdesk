@@ -38,6 +38,7 @@ describe('CatalogRepositoryImpl', () => {
       fetchMembers: () => Promise.reject(networkError()),
       fetchStatusCaseSubStatuses: () => Promise.reject(networkError()),
       updateCase: () => Promise.reject(networkError()),
+      updateCaseStatus: () => Promise.reject(networkError()),
       fetchCountries: () => Promise.reject(networkError()),
       fetchDepartments: () => Promise.reject(networkError()),
     };

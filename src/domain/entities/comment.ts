@@ -27,6 +27,8 @@ export interface NewCommentInput {
   isPrivate: boolean;
   statusCaseId?: number | null;
   statusDesc?: string | null;
+  /** Username de login del autor: el backend lo guarda como userRequester. */
+  authorUsername?: string | null;
 }
 
 /** Iniciales para el avatar a partir del nombre del autor. */

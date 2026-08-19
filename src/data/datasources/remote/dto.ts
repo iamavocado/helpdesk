@@ -120,6 +120,7 @@ export interface CreateCommentDto {
   IsPrivate: boolean;
   StatusCaseId?: number | null;
   StatusDesc?: string | null;
+  UserRequester?: string | null;
 }
 
 export interface CatalogItemDto {

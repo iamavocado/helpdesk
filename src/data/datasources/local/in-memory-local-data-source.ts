@@ -60,7 +60,18 @@ export class InMemoryLocalDataSource implements LocalDataSource {
   }
 
   async upsertComments(comments: Comment[]): Promise<void> {
-    for (const c of comments) this.comments.set(c.id, c);
+    for (const c of comments) {
+      // Elimina el duplicado local (mismo comentario ya sincronizado con otro id
+      // local) para no mostrarlo dos veces al refrescar desde el servidor.
+      if (c.serverId != null) {
+        for (const [key, existing] of this.comments) {
+          if (existing.caseId === c.caseId && existing.serverId === c.serverId && key !== c.id) {
+            this.comments.delete(key);
+          }
+        }
+      }
+      this.comments.set(c.id, c);
+    }
   }
 
   async putComment(c: Comment): Promise<void> {

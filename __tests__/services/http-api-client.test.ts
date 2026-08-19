@@ -99,27 +99,30 @@ describe('HttpApiClient (adaptador API real)', () => {
     expect(c.EquipmentTypeDesc).toBe('Software');
   });
 
-  it('getComments filtra por idCase en el cliente', async () => {
+  it('getComments usa el endpoint por-case y ordena por fecha ascendente', async () => {
+    // El endpoint por-case devuelve un arreglo con solo los comentarios del caso.
     mockFetchOnce(
-      wrap({
-        items: [
-          {
-            id: 1,
-            idCase: 28,
-            comment: 'a',
-            isPrivate: false,
-            creationDate: '2022-01-01T10:00:00',
-          },
-          { id: 1, idCase: 29, comment: 'b', isPrivate: true, creationDate: '2022-01-01T11:00:00' },
-        ],
-        numeroPagina: 1,
-        tamanoPagina: 200,
-        totalRegistros: 3894,
-        totalPaginas: 20,
-      }),
+      wrap([
+        {
+          id: 1,
+          idCase: 28,
+          comment: 'nuevo',
+          isPrivate: false,
+          creationDate: '2022-01-01T11:00:00',
+        },
+        {
+          id: 0,
+          idCase: 28,
+          comment: 'viejo',
+          isPrivate: false,
+          creationDate: '2022-01-01T10:00:00',
+        },
+      ]),
     );
     const comments = await client().getComments(28);
-    expect(comments).toHaveLength(1);
+    expect(comments).toHaveLength(2);
+    expect(comments[0]?.Comment).toBe('viejo'); // ordenado por fecha ascendente
+    expect(comments[1]?.Comment).toBe('nuevo');
     expect(comments[0]?.IdCase).toBe(28);
   });
 });

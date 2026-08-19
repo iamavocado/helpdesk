@@ -28,7 +28,7 @@ import { withAuthRetry } from './with-auth-retry';
  * Notas del contrato real (validado en DESA):
  * - Auth: un solo token JWT + expiración (sin refresh token, sin datos de usuario).
  * - Lista GET /api/Case no trae classificationCaseId ni equipmentType → se derivan.
- * - Comentarios: /api/CasesComment no filtra por caso (limitación del backend).
+ * - Comentarios: se leen con /api/CasesComment/por-case/{idCase} (exactos del caso).
  */
 
 interface ApiRespuesta<T> {
@@ -369,16 +369,13 @@ export class HttpApiClient implements ApiClient {
    * por idCase en el cliente (pendiente de que el backend acepte idCase).
    */
   async getComments(caseServerId: number): Promise<CommentDto[]> {
-    const q = new URLSearchParams();
-    q.set('numeroPagina', '1');
-    q.set('tamanoPagina', '200');
-    q.set('ordenarPor', 'creationDate');
-    q.set('ordenDescendente', 'true');
-    const page = await this.authed<Paginado<ApiComment>>(`/api/CasesComment?${q.toString()}`);
-    return (page.items ?? [])
-      .filter((c) => c.idCase === caseServerId)
+    // Endpoint por-caso: devuelve exactamente los comentarios de ese caso, sin
+    // depender de la paginación global (antes se traía una página amplia y se
+    // filtraba en el cliente, lo que perdía comentarios cuando había muchos).
+    const list = await this.authed<ApiComment[]>(`/api/CasesComment/por-case/${caseServerId}`);
+    return (list ?? [])
       .map((c) => this.commentToDto(c))
-      .reverse();
+      .sort((a, b) => Date.parse(a.CreationDate) - Date.parse(b.CreationDate));
   }
 
   async addComment(dto: CreateCommentDto): Promise<CommentDto> {

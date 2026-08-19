@@ -133,7 +133,19 @@ export class SqliteLocalDataSource implements LocalDataSource {
   // --- Comentarios ---
 
   async upsertComments(comments: Comment[]): Promise<void> {
-    for (const c of comments) await this.putComment(c);
+    const db = await this.db();
+    for (const c of comments) {
+      // Elimina el duplicado local (mismo comentario ya sincronizado con otro id
+      // local) para no mostrarlo dos veces al refrescar desde el servidor.
+      if (c.serverId != null) {
+        await db.runAsync('DELETE FROM comments WHERE case_id = ? AND server_id = ? AND id != ?', [
+          c.caseId,
+          c.serverId,
+          c.id,
+        ]);
+      }
+      await this.putComment(c);
+    }
   }
 
   async putComment(c: Comment): Promise<void> {

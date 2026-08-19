@@ -1,12 +1,16 @@
+import { serverError } from '@/core/errors';
 import {
   ApiRemoteDataSource,
   CaseRepositoryImpl,
   CommentRepositoryImpl,
   InMemoryLocalDataSource,
   SyncEngine,
+  type RemoteDataSource,
 } from '@/data';
 import { isOk } from '@/domain';
 import { MockApiClient } from '@/services/api';
+
+const PARKED = Number.MAX_SAFE_INTEGER;
 
 /**
  * Flujo offline → online (criterio de aceptación del proyecto):
@@ -107,5 +111,50 @@ describe('Sincronización offline → online', () => {
     expect(summary.deferred).toBe(1);
     expect(summary.succeeded).toBe(0);
     expect(await local.countPending()).toBe(1); // sigue en cola
+  });
+
+  it('ante un 500 reintenta (no aparca) y el drenado `all` lo envía al recuperarse', async () => {
+    const local = new InMemoryLocalDataSource();
+    const base = new ApiRemoteDataSource(new MockApiClient());
+    let attempts = 0;
+    // Falla el primer createComment con 500; el segundo intento delega y funciona.
+    const flaky = new Proxy(base, {
+      get(target, prop, receiver) {
+        if (prop === 'createComment') {
+          return (...args: unknown[]) => {
+            attempts++;
+            if (attempts === 1) return Promise.reject(serverError('boom 500'));
+            return (target.createComment as (...a: unknown[]) => unknown)(...args);
+          };
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    }) as RemoteDataSource;
+
+    let counter = 0;
+    const idGen = () => `id-${++counter}`;
+    const caseRepo = new CaseRepositoryImpl(local, flaky, () => 1_000_000, idGen);
+    const commentRepo = new CommentRepositoryImpl(local, flaky, () => 1_000_000, idGen);
+    const sync = new SyncEngine(local, flaky, () => 0.5);
+
+    const created = await caseRepo.create({
+      equipmentTypeId: 2,
+      equipmentTypeDesc: 'Software',
+      caseDetails: 'x',
+    });
+    if (!isOk(created)) throw new Error('setup');
+    await commentRepo.add({ caseId: created.value.id, body: 'hola', isPrivate: false });
+
+    // 1er drenado: el caso sincroniza; el comentario da 500 → se reintenta (NO aparcado).
+    await sync.drain(2_000_000);
+    const [op] = (await local.listAllPending()).filter((o) => o.entityType === 'comment');
+    expect(op).toBeDefined();
+    expect(op.nextAttemptAt).not.toBe(PARKED); // reintentable, no aparcado
+    expect(await local.countPending()).toBe(1);
+
+    // 2º intento con `all` (como en logout): ya recuperado → se envía.
+    const summary = await sync.drain(2_000_000, { all: true });
+    expect(summary.succeeded).toBe(1);
+    expect(await local.countPending()).toBe(0);
   });
 });

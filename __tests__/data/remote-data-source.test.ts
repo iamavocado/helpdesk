@@ -7,7 +7,9 @@ describe('toDomainError', () => {
     expect(toDomainError(new ApiError(401, 'x')).kind).toBe('auth');
     expect(toDomainError(new ApiError(403, 'x')).kind).toBe('auth');
     expect(toDomainError(new ApiError(404, 'x')).kind).toBe('not_found');
-    expect(toDomainError(new ApiError(500, 'x')).kind).toBe('unknown');
+    // 5xx = transitorio del servidor → 'server' (reintentable por el SyncEngine).
+    expect(toDomainError(new ApiError(500, 'x')).kind).toBe('server');
+    expect(toDomainError(new ApiError(503, 'x')).kind).toBe('server');
   });
 
   it('traduce errores desconocidos', () => {

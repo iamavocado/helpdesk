@@ -46,7 +46,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Empuja lo pendiente ANTES de invalidar el token y limpiar la caché, para no
     // perder casos/comentarios creados sin sincronizar. Tolerante a falta de red.
     try {
-      await container.syncEngine.drain();
+      // `all`: intenta TODAS las pendientes (incluidas diferidas/aparcadas) una
+      // última vez antes de limpiar, para no perder comentarios/casos sin enviar.
+      await container.syncEngine.drain(Date.now(), { all: true });
     } catch {
       // sin conexión: se limpia igualmente (compromiso de seguridad: no dejar datos)
     }

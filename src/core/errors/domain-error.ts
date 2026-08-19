@@ -1,6 +1,7 @@
 /** Tipos de error de dominio, usados con Result<T, DomainError>. */
 export type DomainErrorKind =
   | 'network'
+  | 'server'
   | 'auth'
   | 'validation'
   | 'conflict'
@@ -21,6 +22,10 @@ export class DomainError extends Error {
 
 export const networkError = (message = 'Sin conexión o servidor no disponible', cause?: unknown) =>
   new DomainError('network', message, cause);
+
+/** Error 5xx del servidor: transitorio, se debe reintentar (no aparcar). */
+export const serverError = (message = 'Error del servidor', cause?: unknown) =>
+  new DomainError('server', message, cause);
 
 export const authError = (message = 'No autorizado', cause?: unknown) =>
   new DomainError('auth', message, cause);

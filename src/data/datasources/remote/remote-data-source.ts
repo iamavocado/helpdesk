@@ -2,6 +2,7 @@ import {
   type DomainError,
   networkError,
   notFoundError,
+  serverError,
   unknownError,
   authError,
 } from '@/core/errors';
@@ -44,6 +45,8 @@ export function toDomainError(error: unknown): DomainError {
     if (error.status === 0) return networkError(error.message, error);
     if (error.status === 401 || error.status === 403) return authError(error.message, error);
     if (error.status === 404) return notFoundError(error.message, error);
+    // 5xx: fallo transitorio del servidor → reintentable (no aparcar la operación).
+    if (error.status >= 500) return serverError(error.message, error);
     return unknownError(error.message, error);
   }
   return unknownError('Error inesperado en la API', error);

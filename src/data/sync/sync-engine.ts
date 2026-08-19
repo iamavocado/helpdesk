@@ -29,9 +29,16 @@ export class SyncEngine {
     private readonly random: () => number = Math.random,
   ) {}
 
-  async drain(now: number = Date.now()): Promise<DrainSummary> {
+  /**
+   * Drena la cola. Con `all: true` procesa **todas** las operaciones pendientes
+   * (incluidas las diferidas/aparcadas), no solo las que ya tocan por horario;
+   * se usa antes de cerrar sesión para dar un último intento antes de limpiar.
+   */
+  async drain(now: number = Date.now(), opts: { all?: boolean } = {}): Promise<DrainSummary> {
     const summary: DrainSummary = { processed: 0, succeeded: 0, failed: 0, deferred: 0 };
-    const ready = await this.local.listReadyOperations(now);
+    const ready = opts.all
+      ? await this.local.listAllPending()
+      : await this.local.listReadyOperations(now);
 
     for (const op of ready) {
       summary.processed++;
@@ -85,10 +92,13 @@ export class SyncEngine {
   }
 
   private async handleFailure(op: PendingOperation, error: unknown, now: number): Promise<void> {
-    const isNetwork = error instanceof DomainError && error.kind === 'network';
+    // Errores transitorios (sin red o 5xx del servidor) se reintentan con backoff;
+    // el resto (validación, auth…) es terminal y se aparca.
+    const isTransient =
+      error instanceof DomainError && (error.kind === 'network' || error.kind === 'server');
     const message = error instanceof Error ? error.message : String(error);
 
-    if (!isNetwork || exhaustedRetries(op.retryCount + 1)) {
+    if (!isTransient || exhaustedRetries(op.retryCount + 1)) {
       // Error terminal o reintentos agotados: se aparca para revisión manual (Fase 6).
       logger.warn('Operación de sync aparcada', { id: op.id, kind: op.entityType });
       await this.local.updateOperation({

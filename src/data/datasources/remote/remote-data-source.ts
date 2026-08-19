@@ -211,11 +211,11 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   }
 
   /**
-   * Actualiza SOLO el estado con un PUT mínimo `{Id, UserRequester, StatusCaseId,
-   * ClassificationCaseId}`. El backend devuelve 500 si en el PUT se incluye toda
-   * la taxonomía al cerrar un caso (estado 4); el payload mínimo funciona para
-   * todos los estados (verificado en vivo). El resto de campos van `undefined`
-   * para que no se envíen.
+   * Actualiza SOLO el estado con un PUT mínimo `{Id, UserRequester, StatusCaseId}`.
+   * IMPORTANTE: NO se envía `classificationCaseId` — el backend hace 500 al cerrar
+   * un caso (estado 4) si el PUT incluye ese campo (verificado en vivo). Sin él, el
+   * PUT funciona para todos los estados. La clasificación no se pierde: la app
+   * siempre la deriva del `statusCaseId` (ver mapeos de lista y detalle).
    */
   async updateCaseStatus(current: Case, statusCaseId: number): Promise<Case> {
     if (current.serverId == null) {
@@ -225,7 +225,6 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       Id: current.serverId,
       UserRequester: current.userRequester,
       StatusCaseId: statusCaseId,
-      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
     };
     try {
       return dtoToCase(await this.api.updateCase(dto));

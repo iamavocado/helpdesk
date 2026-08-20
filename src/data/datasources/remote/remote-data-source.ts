@@ -211,11 +211,12 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   }
 
   /**
-   * Actualiza SOLO el estado con un PUT mínimo `{Id, UserRequester, StatusCaseId}`.
-   * IMPORTANTE: NO se envía `classificationCaseId` — el backend hace 500 al cerrar
-   * un caso (estado 4) si el PUT incluye ese campo (verificado en vivo). Sin él, el
-   * PUT funciona para todos los estados. La clasificación no se pierde: la app
-   * siempre la deriva del `statusCaseId` (ver mapeos de lista y detalle).
+   * Actualiza SOLO el estado con un PUT mínimo
+   * `{Id, UserRequester, StatusCaseId, ClassificationCaseId}`.
+   * IMPORTANTE: `classificationCaseId` es OBLIGATORIO — sin él, el backend hace 500
+   * en cualquier transición de estado de un caso ya existente (verificado en vivo
+   * bisecando el payload del equipo backend). Funciona para los estados 1, 2 y 3;
+   * los estados 4/5/6 el backend aún los rechaza con 500 (pendiente de su lado).
    */
   async updateCaseStatus(current: Case, statusCaseId: number): Promise<Case> {
     if (current.serverId == null) {
@@ -225,6 +226,7 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       Id: current.serverId,
       UserRequester: current.userRequester,
       StatusCaseId: statusCaseId,
+      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
     };
     try {
       return dtoToCase(await this.api.updateCase(dto));

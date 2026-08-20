@@ -111,8 +111,19 @@ export class SqliteLocalDataSource implements LocalDataSource {
     const db = await this.db();
     const page = params.page ?? 1;
     const pageSize = params.pageSize ?? 20;
-    const where = params.classification ? 'WHERE classification = ?' : '';
-    const whereArgs = params.classification ? [params.classification] : [];
+    // Filtro por clasificación (columna indexada) o por estado detallado
+    // (statusCaseId, extraído del JSON) para separar Resueltos de Cerrados.
+    const clauses: string[] = [];
+    const whereArgs: (string | number)[] = [];
+    if (params.classification) {
+      clauses.push('classification = ?');
+      whereArgs.push(params.classification);
+    }
+    if (params.statusCaseId != null) {
+      clauses.push("json_extract(data, '$.statusCaseId') = ?");
+      whereArgs.push(params.statusCaseId);
+    }
+    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
 
     const totalRow = await db.getFirstAsync<{ n: number }>(
       `SELECT COUNT(*) as n FROM cases ${where}`,

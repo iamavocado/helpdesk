@@ -54,6 +54,7 @@ export class InMemoryLocalDataSource implements LocalDataSource {
           ? true
           : classificationFromId(c.classificationId) === params.classification,
       )
+      .filter((c) => params.statusCaseId == null || c.statusCaseId === params.statusCaseId)
       .sort((a, b) => b.creationDate - a.creationDate);
     const start = (page - 1) * pageSize;
     return { items: all.slice(start, start + pageSize), page, pageSize, total: all.length };

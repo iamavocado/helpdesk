@@ -4,7 +4,7 @@ import { AppHeader, CaseListItem } from '@/presentation/components';
 import { Chip, Text, colors, spacing } from '@/design-system';
 import type { Case, Classification } from '@/domain';
 
-export type ListFilter = Classification | 'todos';
+export type ListFilter = 'todos' | 'pendiente' | 'cola' | 'resuelto' | 'cerrado';
 
 export interface CasesListScreenProps {
   cases: Case[];
@@ -22,6 +22,7 @@ const FILTERS: { key: ListFilter; label: string; dot?: Classification }[] = [
   { key: 'todos', label: 'Todos' },
   { key: 'pendiente', label: 'Pendientes', dot: 'pendiente' },
   { key: 'cola', label: 'En Cola', dot: 'cola' },
+  { key: 'resuelto', label: 'Resueltos', dot: 'cerrado' },
   { key: 'cerrado', label: 'Cerrados', dot: 'cerrado' },
 ];
 
@@ -29,6 +30,7 @@ const TITLES: Record<ListFilter, { title: string; subtitle: string }> = {
   todos: { title: 'Mis casos', subtitle: 'Todos los casos' },
   pendiente: { title: 'Pendientes', subtitle: 'Casos pendientes' },
   cola: { title: 'En Cola', subtitle: 'Casos esperando' },
+  resuelto: { title: 'Resueltos', subtitle: 'Casos resueltos' },
   cerrado: { title: 'Cerrados', subtitle: 'Casos cerrados' },
 };
 

@@ -10,6 +10,8 @@ export interface ReassignOptions {
 
 export interface ListCasesParams {
   classification?: Classification;
+  /** Filtra por estado detallado (StatusCase.Id), ej. 3 = Resuelto, 4 = Cerrado. */
+  statusCaseId?: number;
   page?: number;
   pageSize?: number;
 }

@@ -3,9 +3,26 @@ import { useCallback, useEffect, useState } from 'react';
 import { getContainer } from '@/core/di';
 import { isOk, type Case, type Classification } from '@/domain';
 
-export type CaseFilter = Classification | 'todos';
+/** Filtros de la lista: los 3 grupos + "Resuelto" (estado detallado) + todos. */
+export type CaseFilter = 'todos' | 'pendiente' | 'cola' | 'resuelto' | 'cerrado';
 
 const PAGE_SIZE = 20;
+
+/** Traduce el chip de filtro a parámetros de consulta (clasificación o estado). */
+function filterToParams(f: CaseFilter): { classification?: Classification; statusCaseId?: number } {
+  switch (f) {
+    case 'pendiente':
+      return { classification: 'pendiente' };
+    case 'cola':
+      return { classification: 'cola' };
+    case 'resuelto':
+      return { statusCaseId: 3 }; // Resuelto
+    case 'cerrado':
+      return { statusCaseId: 4 }; // Cerrado (separado de Resuelto)
+    default:
+      return {};
+  }
+}
 
 interface CasesListData {
   items: Case[];
@@ -33,7 +50,7 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
   const fetchPage = useCallback(
     async (targetPage: number, currentFilter: CaseFilter) => {
       const result = await repo.list({
-        classification: currentFilter === 'todos' ? undefined : currentFilter,
+        ...filterToParams(currentFilter),
         page: targetPage,
         pageSize: PAGE_SIZE,
       });

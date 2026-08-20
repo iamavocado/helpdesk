@@ -9,6 +9,7 @@ import {
   caseDisplayId,
   caseTitle,
   classificationLabel,
+  statusCaseLabel,
   type Attachment,
   type Case,
   type Comment,
@@ -207,7 +208,7 @@ export function CaseDetailScreen({
 
   const infoRows = (
     [
-      ['Estado', caseItem.statusCaseDesc],
+      ['Estado', caseItem.statusCaseDesc?.trim() || statusCaseLabel(caseItem.statusCaseId)],
       ['Cliente', caseItem.client],
       ['Categoría', caseItem.equipmentTypeDesc],
       ['Módulo', caseItem.softwareModuleDesc],
@@ -259,7 +260,9 @@ export function CaseDetailScreen({
           ))}
           <View style={styles.metaChipStatus}>
             <Text variant="caption" color={colors.white}>
-              {classificationLabel(caseItem.classification)}
+              {caseItem.statusCaseDesc?.trim() ||
+                statusCaseLabel(caseItem.statusCaseId) ||
+                classificationLabel(caseItem.classification)}
             </Text>
           </View>
         </View>

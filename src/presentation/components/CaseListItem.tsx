@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { timeAgo } from '@/core/utils/date';
 import { Badge, Card, Text, colors, spacing } from '@/design-system';
-import { caseTitle, classificationLabel, type Case } from '@/domain';
+import { caseTitle, classificationLabel, statusCaseLabel, type Case } from '@/domain';
 
 export interface CaseListItemProps {
   item: Case;
@@ -33,7 +33,14 @@ export function CaseListItem({ item, onPress, now }: CaseListItemProps) {
             {title}
           </Text>
         </View>
-        <Badge status={item.classification} label={classificationLabel(item.classification)} />
+        <Badge
+          status={item.classification}
+          label={
+            item.statusCaseDesc?.trim() ||
+            statusCaseLabel(item.statusCaseId) ||
+            classificationLabel(item.classification)
+          }
+        />
       </View>
       <Text variant="caption" color={colors.inkFaint}>
         {meta.join('  ·  ')}

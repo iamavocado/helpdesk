@@ -37,6 +37,25 @@ export function classificationLabel(c: Classification): string {
 }
 
 /**
+ * `StatusCase.Id` → etiqueta corta del estado real (para el badge del caso).
+ * Distinto de la clasificación: "Resuelto" y "Cerrado" son ambos del grupo
+ * "cerrado", pero deben mostrarse con su nombre propio, no como "Cerrado".
+ */
+export const STATUS_CASE_LABEL: Readonly<Record<number, string>> = {
+  1: 'En espera',
+  2: 'En cola',
+  3: 'Resuelto',
+  4: 'Cerrado',
+  5: 'Espera AIG',
+  6: 'Espera cliente',
+};
+
+export function statusCaseLabel(statusCaseId: number | null | undefined): string | null {
+  if (statusCaseId == null) return null;
+  return STATUS_CASE_LABEL[statusCaseId] ?? null;
+}
+
+/**
  * `StatusCase.Id` → `ClassificationStatusCase.Id` (heurística documentada):
  * 1,5,6 → Pendiente · 2 → Cola · 3,4 → Cerrado. Ver `http-api-client.ts`.
  */

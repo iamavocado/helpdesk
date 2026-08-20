@@ -18,7 +18,6 @@ import type {
   NewCommentInput,
   ReassignInput,
 } from '@/domain';
-import { classificationIdFromStatus } from '@/domain';
 import { ApiError, type ApiClient, type GetCasesParams } from '@/services/api';
 
 import type { UpdateCaseDto } from './dto';
@@ -192,7 +191,7 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       UserRequester: current.userRequester,
       EmailRequester: current.requesterEmail,
       StatusCaseId: statusCaseId,
-      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
+      ClassificationCaseId: statusCaseId, // el backend exige cls == status
       PriorityId: current.priorityId,
       ServiceTypeId: input.serviceTypeId ?? current.serviceTypeId,
       EquipmentTypeId: input.equipmentTypeId ?? current.equipmentTypeId,
@@ -213,10 +212,11 @@ export class ApiRemoteDataSource implements RemoteDataSource {
   /**
    * Actualiza SOLO el estado con un PUT mínimo
    * `{Id, UserRequester, StatusCaseId, ClassificationCaseId}`.
-   * IMPORTANTE: `classificationCaseId` es OBLIGATORIO — sin él, el backend hace 500
-   * en cualquier transición de estado de un caso ya existente (verificado en vivo
-   * bisecando el payload del equipo backend). Funciona para los estados 1, 2 y 3;
-   * los estados 4/5/6 el backend aún los rechaza con 500 (pendiente de su lado).
+   * IMPORTANTE: el backend EXIGE que `classificationCaseId` sea IGUAL a
+   * `statusCaseId` (verificado en vivo: cualquier valor distinto → 500). Con este
+   * valor, TODOS los estados funcionan (1–6, incluido Cerrado). La clasificación
+   * real (pendiente/cola/cerrado) no se ve afectada: la app la deriva del
+   * `statusCaseId` en la lista y el detalle.
    */
   async updateCaseStatus(current: Case, statusCaseId: number): Promise<Case> {
     if (current.serverId == null) {
@@ -226,7 +226,7 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       Id: current.serverId,
       UserRequester: current.userRequester,
       StatusCaseId: statusCaseId,
-      ClassificationCaseId: classificationIdFromStatus(statusCaseId),
+      ClassificationCaseId: statusCaseId, // el backend exige cls == status
     };
     try {
       return dtoToCase(await this.api.updateCase(dto));

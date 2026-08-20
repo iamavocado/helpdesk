@@ -1,4 +1,4 @@
-import type { Classification } from '@/domain';
+import type { CaseFilter } from '@/presentation/hooks/use-cases-list';
 
 /** Rutas del stack raíz (post-login). */
 export type RootStackParamList = {
@@ -10,7 +10,7 @@ export type RootStackParamList = {
 /** Pestañas inferiores. */
 export type TabParamList = {
   Home: undefined;
-  Cases: { classification?: Classification } | undefined;
+  Cases: { filter?: CaseFilter } | undefined;
   Search: undefined;
   Profile: undefined;
 };

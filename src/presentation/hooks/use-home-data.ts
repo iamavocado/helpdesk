@@ -45,8 +45,14 @@ export function useHomeData(): HomeData {
   }, [load]);
 
   const counts = useMemo<HomeCounts>(() => {
-    const c: HomeCounts = { pendiente: 0, cola: 0, cerrado: 0, total: cases.length };
-    for (const item of cases) c[item.classification]++;
+    const c: HomeCounts = { pendiente: 0, cola: 0, resuelto: 0, cerrado: 0, total: cases.length };
+    for (const item of cases) {
+      if (item.classification === 'pendiente') c.pendiente++;
+      else if (item.classification === 'cola') c.cola++;
+      // Grupo "cerrado": se separa Resuelto (estado 3) de Cerrado (estado 4).
+      else if (item.statusCaseId === 3) c.resuelto++;
+      else c.cerrado++;
+    }
     return c;
   }, [cases]);
 

@@ -2,20 +2,25 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-n
 
 import { AppHeader, CaseListItem } from '@/presentation/components';
 import { Text, colors, fontFamily, radii, shadows, spacing, statusColors } from '@/design-system';
-import type { Case, Classification } from '@/domain';
+import type { Case } from '@/domain';
+import type { CaseFilter } from '@/presentation/hooks/use-cases-list';
 
 export interface HomeCounts {
   pendiente: number;
   cola: number;
+  resuelto: number;
   cerrado: number;
   total: number;
 }
+
+/** Tarjetas del dashboard que navegan a la lista con ese filtro. */
+type CardKey = 'pendiente' | 'cola' | 'resuelto' | 'cerrado' | 'total';
 
 export interface HomeScreenProps {
   userName: string;
   counts: HomeCounts;
   recentCases: Case[];
-  onOpenList: (classification?: Classification) => void;
+  onOpenList: (filter?: CaseFilter) => void;
   onOpenCase: (caseId: string) => void;
   onCreateCase: () => void;
   refreshing?: boolean;
@@ -23,7 +28,7 @@ export interface HomeScreenProps {
 }
 
 interface CardDef {
-  key: Classification | 'total';
+  key: CardKey;
   label: string;
   count: number;
   color: string;
@@ -49,12 +54,18 @@ export function HomeScreen({
     },
     { key: 'cola', label: 'Casos en Cola', count: counts.cola, color: statusColors.cola.base },
     {
+      key: 'resuelto',
+      label: 'Casos Resueltos',
+      count: counts.resuelto,
+      color: colors.brandTeal,
+    },
+    {
       key: 'cerrado',
       label: 'Casos Cerrados',
       count: counts.cerrado,
       color: statusColors.cerrado.base,
     },
-    { key: 'total', label: 'Total de casos', count: counts.total, color: colors.brandTeal },
+    { key: 'total', label: 'Total de casos', count: counts.total, color: colors.brandDark },
   ];
 
   return (

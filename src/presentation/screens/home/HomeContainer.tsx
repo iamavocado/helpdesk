@@ -4,7 +4,7 @@ import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
 
-import type { Classification } from '@/domain';
+import type { CaseFilter } from '@/presentation/hooks/use-cases-list';
 import { useHomeData } from '@/presentation/hooks/use-home-data';
 import { useAuthStore } from '@/presentation/stores';
 
@@ -36,8 +36,8 @@ export function HomeContainer() {
       recentCases={recent}
       refreshing={refreshing}
       onRefresh={refresh}
-      onOpenList={(classification?: Classification) =>
-        navigation.navigate('Cases', classification ? { classification } : undefined)
+      onOpenList={(filter?: CaseFilter) =>
+        navigation.navigate('Cases', filter ? { filter } : undefined)
       }
       onOpenCase={(caseId: string) => navigation.navigate('CaseDetail', { caseId })}
       onCreateCase={() => navigation.navigate('NewCase')}

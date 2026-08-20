@@ -42,7 +42,7 @@ const sampleCase = (overrides: Partial<Case> = {}): Case => ({
 
 const baseProps = {
   userName: 'Saulo',
-  counts: { pendiente: 5, cola: 2, cerrado: 3, total: 10 },
+  counts: { pendiente: 5, cola: 2, resuelto: 1, cerrado: 3, total: 10 },
   recentCases: [sampleCase()],
   onOpenList: jest.fn(),
   onOpenCase: jest.fn(),

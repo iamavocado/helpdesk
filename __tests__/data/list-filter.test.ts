@@ -45,7 +45,9 @@ describe('listCases con filtro por estado (Resuelto vs Cerrado)', () => {
   it('separa Resuelto (statusCaseId 3) de Cerrado (statusCaseId 4)', async () => {
     const local = new InMemoryLocalDataSource();
     await local.putCase(makeCase({ id: 'a', serverId: 1, statusCaseId: 3 })); // Resuelto
-    await local.putCase(makeCase({ id: 'b', serverId: 2, statusCaseId: 4, statusCaseDesc: 'Cerrado' })); // Cerrado
+    await local.putCase(
+      makeCase({ id: 'b', serverId: 2, statusCaseId: 4, statusCaseDesc: 'Cerrado' }),
+    ); // Cerrado
     await local.putCase(makeCase({ id: 'c', serverId: 3, statusCaseId: 3 })); // Resuelto
 
     const resueltos = await local.listCases({ statusCaseId: 3, page: 1, pageSize: 20 });
@@ -57,7 +59,11 @@ describe('listCases con filtro por estado (Resuelto vs Cerrado)', () => {
     expect(cerrados.items[0]?.id).toBe('b');
 
     // La clasificación 'cerrado' agrupa ambos (3 y 4).
-    const grupoCerrado = await local.listCases({ classification: 'cerrado', page: 1, pageSize: 20 });
+    const grupoCerrado = await local.listCases({
+      classification: 'cerrado',
+      page: 1,
+      pageSize: 20,
+    });
     expect(grupoCerrado.total).toBe(3);
   });
 });

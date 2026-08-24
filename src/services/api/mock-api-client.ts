@@ -60,7 +60,12 @@ export class MockApiClient implements ApiClient {
     return {
       accessToken: token,
       refreshToken: `refresh.${username}.${Date.now()}`,
-      user: { username, name: this.displayName(username), email: `${username}@ita-sa.com` },
+      user: {
+        username,
+        name: this.displayName(username),
+        email: `${username}@ita-sa.com`,
+        role: 'Usuario',
+      },
     };
   }
 

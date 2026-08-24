@@ -9,6 +9,8 @@ export interface AuthUser {
   username: string;
   name: string;
   email: string;
+  /** Rol del usuario (del JWT), p. ej. "Usuario", "Administrador". */
+  role?: string | null;
 }
 
 /** Sesión activa: usuario + tokens JWT. */

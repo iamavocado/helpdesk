@@ -142,6 +142,7 @@ export interface AuthUserDto {
   username: string;
   name: string;
   email: string;
+  role?: string | null;
 }
 
 export interface AuthTokensDto {

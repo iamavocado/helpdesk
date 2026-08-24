@@ -235,11 +235,15 @@ export class HttpApiClient implements ApiClient {
       str(claims['email']) ??
       str(claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']) ??
       '';
+    const role =
+      str(claims['role']) ??
+      str(claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']) ??
+      null;
     // La API no expone refresh token: se guarda vacío → en 401 se fuerza re-login.
     return {
       accessToken: datos.token,
       refreshToken: '',
-      user: { username: body.username, name, email },
+      user: { username: body.username, name, email, role },
     };
   }
 

@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fullWidth: { alignSelf: 'stretch' },
-  primary: { backgroundColor: colors.brandTeal },
+  primary: { backgroundColor: colors.brandAccent },
   secondary: {
     backgroundColor: colors.surface,
     borderWidth: 1,

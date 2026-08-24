@@ -4,24 +4,24 @@
  */
 export const colors = {
   // Marca
-  brandDark: '#1e2a3a', // azul marino del logo
-  brandDarker: '#151e2b',
-  brandTeal: '#2d9b8f', // verde azulado del logo
-  brandTealBright: '#3eb5a7',
-  brandAccent: '#f5a623', // acento cálido
+  brandDark: '#123b5d', // azul petróleo de la referencia
+  brandDarker: '#071d3d',
+  brandTeal: '#087f91', // turquesa de apoyo
+  brandTealBright: '#66d4df',
+  brandAccent: '#c94ca5', // magenta de la acción principal
 
   // Superficies y texto
-  bg: '#f4f6f8',
+  bg: '#f7f8fa',
   surface: '#ffffff',
-  ink: '#1e2a3a',
-  inkSoft: '#4a5868',
-  inkFaint: '#8a95a3',
-  line: '#e3e8ee',
+  ink: '#123b5d',
+  inkSoft: '#5b6d84',
+  inkFaint: '#7b8aa0',
+  line: '#d9e2eb',
   white: '#ffffff',
 
   // Estados oficiales (clasificación) + variantes suaves
-  pendiente: '#f0934a',
-  pendienteSoft: '#fde6d3',
+  pendiente: '#e68a48',
+  pendienteSoft: '#fce5d3',
   cola: '#e53935',
   colaSoft: '#fcdbd9',
   resuelto: '#7cb342',

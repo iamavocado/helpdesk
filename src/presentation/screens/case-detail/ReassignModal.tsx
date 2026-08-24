@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Input, Select, Text, colors, radii, spacing } from '@/design-system';
 import type { Case, CatalogItem, Member, ReassignInput } from '@/domain';
@@ -43,6 +44,7 @@ export function ReassignModal({ visible, caseItem, onClose, onDone }: ReassignMo
     load,
     submit,
   } = useReassign();
+  const insets = useSafeAreaInsets();
 
   const [technician, setTechnician] = useState<string | undefined>(
     caseItem.technician ?? undefined,
@@ -96,7 +98,7 @@ export function ReassignModal({ visible, caseItem, onClose, onDone }: ReassignMo
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing['3xl']) }]}>
           <View style={styles.headerRow}>
             <Text variant="sectionTitle" color={colors.brandDark}>
               Reasignar Caso
@@ -203,7 +205,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingHorizontal: spacing.screen,
     paddingTop: spacing['3xl'],
-    paddingBottom: spacing['3xl'],
     maxHeight: '90%',
   },
   headerRow: {

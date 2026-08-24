@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, colors, radii, shadows, spacing } from '@/design-system';
 
@@ -27,6 +28,7 @@ export function CustomTabBar({
   navigation,
   onFabPress,
 }: BottomTabBarProps & { onFabPress: () => void }) {
+  const insets = useSafeAreaInsets();
   const routes = state.routes;
   const left = routes.slice(0, 2);
   const right = routes.slice(2);
@@ -55,7 +57,9 @@ export function CustomTabBar({
   };
 
   return (
-    <View style={styles.bar}>
+    // paddingBottom = barra de navegación del sistema (safe area) para que las
+    // pestañas nunca queden debajo de los botones del teléfono (cualquier modelo).
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 16) }]}>
       {left.map((r) => renderItem(r.name, state.routes.indexOf(r)))}
       <Pressable
         accessibilityRole="button"
@@ -79,7 +83,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.line,
     paddingTop: spacing.lg,
-    paddingBottom: 28,
     paddingHorizontal: spacing.screen,
   },
   item: { flex: 1, alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },

@@ -19,6 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   userInterfaceStyle: 'light',
   scheme: 'dozzier',
+  icon: './assets/icon.png',
   assetBundlePatterns: ['**/*'],
   plugins: ['expo-font', 'expo-secure-store', 'expo-sqlite'],
   ios: {
@@ -34,6 +35,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: 'com.ita.dozzier.helpdesk',
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      backgroundColor: '#ffffff',
+    },
     // minSdkVersion 24 y cleartext=false se fijan vía expo-build-properties en una fase posterior
   },
   extra: {

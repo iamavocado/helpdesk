@@ -6,8 +6,8 @@ export const colors = {
   // Marca
   brandDark: '#123b5d', // azul petróleo de la referencia
   brandDarker: '#071d3d',
-  brandTeal: '#087f91', // turquesa de apoyo
-  brandTealBright: '#66d4df',
+  brandTeal: '#c94ca5', // rosado de la referencia
+  brandTealBright: '#c94ca5',
   brandAccent: '#c94ca5', // magenta de la acción principal
 
   // Superficies y texto

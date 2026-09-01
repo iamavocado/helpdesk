@@ -13,8 +13,8 @@ loadEnv({ path: `.env.${APP_ENV}` });
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'DOZZIER HelpDesk',
-  slug: 'dozzier-helpdesk-mobile',
+  name: 'HelpDesk MagicBox',
+  slug: 'dozzier-magicbox-mobile',
   version: '0.1.0',
   orientation: 'portrait',
   userInterfaceStyle: 'light',

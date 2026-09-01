@@ -131,43 +131,28 @@ export function NewCaseScreen({
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
 
-    // Campos del web sin columna propia en el dominio se anexan al detalle.
-    const extras: string[] = [];
-    if (draft.departamento.trim()) extras.push(`Departamento: ${draft.departamento.trim()}`);
-    if (draft.cargo.trim()) extras.push(`Cargo: ${draft.cargo.trim()}`);
-    if (draft.referenceNumber.trim()) extras.push(`N° Referencia: ${draft.referenceNumber.trim()}`);
-    const caseDetails = extras.length
-      ? `${draft.caseDetails.trim()}\n\n${extras.join('\n')}`
-      : draft.caseDetails.trim();
+    const caseDetails = draft.caseDetails.trim();
 
     const input: NewCaseInput = {
       equipmentTypeId: draft.equipmentTypeId!,
-      equipmentTypeDesc: descById(catalogs.equipmentTypes, draft.equipmentTypeId) ?? '',
       caseDetails,
       client: draft.client || null,
-      userRequester: requesterUsername,
+      userRequester: userName,
       emailRequester: userEmail || null,
-      reportingUser: draft.reportingUser || null,
-      reportingUserEmail: draft.endUserEmail || null,
       softwareModuleId: isSoftware ? (draft.moduleId ?? null) : null,
-      softwareModuleDesc: isSoftware ? descById(catalogs.modules, draft.moduleId) : null,
       softwareEnvironmentId: isSoftware ? (draft.environmentId ?? null) : null,
-      softwareEnvironmentDesc: isSoftware
-        ? descById(catalogs.environments, draft.environmentId)
-        : null,
       hardwareEquipmentId: isHardware ? (draft.hardwareEquipmentId ?? null) : null,
-      hardwareEquipmentDesc: isHardware
-        ? descById(catalogs.hardwareEquipment, draft.hardwareEquipmentId)
-        : null,
       priorityId: draft.priorityId ?? null,
-      priorityDesc: descById(catalogs.priorities, draft.priorityId),
       serviceTypeId: draft.serviceTypeId ?? null,
-      serviceTypeDesc: descById(catalogs.serviceTypes, draft.serviceTypeId),
       location: draft.location || null,
       countryId: draft.countryId ?? null,
-      countryDesc: descById(countries, draft.countryId),
       departmentId: draft.departmentId ?? null,
-      departmentDesc: descById(departments, draft.departmentId),
+      statusCaseId: 1,
+      classificationCaseId: 1,
+      serial: draft.referenceNumber.trim() || null,
+      technician: userName,
+      positionRequester: draft.cargo || null,
+      departmentRequester: draft.departamento || null,
     };
 
     const initialComment = commentBody.trim()
@@ -176,7 +161,7 @@ export function NewCaseScreen({
           isPrivate: commentPrivate,
           statusCaseId: commentStatus.id,
           statusDesc: commentStatus.desc,
-          authorUsername: requesterUsername,
+          authorUsername: userName,
         }
       : undefined;
 

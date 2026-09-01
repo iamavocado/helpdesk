@@ -29,7 +29,7 @@ interface CaseDetailData {
 /** Carga un caso y su conversación; permite agregar comentarios (offline-first). */
 export function useCaseDetail(caseId: string): CaseDetailData {
   const { caseRepository, commentRepository, syncEngine } = getContainer();
-  const authorUsername = useAuthStore((s) => s.user?.username ?? null);
+  const authorUsername = useAuthStore((s) => s.user?.name ?? null);
   const [caseItem, setCaseItem] = useState<Case | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [attachments, setAttachments] = useState<Record<number, Attachment[]>>({});

@@ -25,7 +25,13 @@ export function NewCaseContainer() {
       submitting={submitting}
       onCancel={() => navigation.goBack()}
       onSubmit={async (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => {
+        console.log('[DEBUG] NewCaseContainer.onSubmit — input:', JSON.stringify(input));
+        console.log(
+          '[DEBUG] NewCaseContainer.onSubmit — comment:',
+          comment ? JSON.stringify(comment) : 'sin comentario',
+        );
         const created = await submit(input, comment);
+        console.log('[DEBUG] NewCaseContainer.onSubmit — resultado created:', created);
         if (created) navigation.goBack();
       }}
     />

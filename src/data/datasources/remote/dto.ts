@@ -52,29 +52,26 @@ export interface CommentDto {
 
 /** Cuerpo para crear un caso en el servidor. */
 export interface CreateCaseDto {
-  EquipmentTypeId: number;
-  EquipmentTypeDesc: string;
-  SoftwareModuleId?: number | null;
-  SoftwareModuleDesc?: string | null;
-  SoftwareEnvironmentId?: number | null;
-  SoftwareEnvironmentDesc?: string | null;
-  HardwareEquipmentId?: number | null;
-  HardwareEquipmentDesc?: string | null;
-  ServiceTypeId?: number | null;
-  ServiceTypeDesc?: string | null;
-  PriorityId?: number | null;
-  PriorityDesc?: string | null;
-  CaseDetails: string;
-  Client?: string | null;
-  UserRequester?: string | null;
-  EmailRequester?: string | null;
-  ReportingUser?: string | null;
-  ReportingUserEmail?: string | null;
-  Location?: string | null;
-  CountryId?: number | null;
-  CountryDesc?: string | null;
-  DepartmentId?: number | null;
-  DepartmentDesc?: string | null;
+  userRequester: string;
+  statusCaseId: number;
+  classificationCaseId: number;
+  priorityId: number | null;
+  serviceTypeId: number | null;
+  equipmentTypeId: number;
+  serial: string | null;
+  location: string | null;
+  caseDetails: string;
+  technician: string | null;
+  emailRequester: string | null;
+  positionRequester: string | null;
+  departmentRequester: string | null;
+  softwareModuleId: number | null;
+  softwareEnvironmentId: number | null;
+  hardwareEquipmentId: number | null;
+  client: string | null;
+  countryId: number | null;
+  departmentId: number | null;
+  subDepartment: string | null;
 }
 
 /** Persona asignable (GET /api/ultimus-user-members). */

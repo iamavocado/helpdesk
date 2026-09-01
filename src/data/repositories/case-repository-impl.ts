@@ -52,37 +52,38 @@ export class CaseRepositoryImpl implements CaseRepository {
   }
 
   async create(input: NewCaseInput): Promise<Result<Case, DomainError>> {
+    console.log('[DEBUG] CaseRepositoryImpl.create — input:', JSON.stringify(input));
     const timestamp = this.now();
     const id = this.idGen();
     const newCase: Case = {
       id,
       serverId: null,
-      userRequester: input.userRequester ?? input.reportingUser ?? '',
-      requesterEmail: input.emailRequester ?? input.reportingUserEmail ?? null,
-      reportingUser: input.reportingUser ?? null,
-      reportingUserEmail: input.reportingUserEmail ?? null,
+      userRequester: input.userRequester ?? '',
+      requesterEmail: input.emailRequester ?? null,
+      reportingUser: null,
+      reportingUserEmail: null,
       creationDate: timestamp,
       modificationDate: timestamp,
       solutionDate: null,
-      classificationId: 1,
-      classification: classificationFromId(1),
-      statusCaseId: 1,
+      classificationId: input.classificationCaseId ?? 1,
+      classification: classificationFromId(input.classificationCaseId ?? 1),
+      statusCaseId: input.statusCaseId ?? 1,
       statusCaseDesc: 'En espera de respuesta soporte',
       subStatusId: 1,
       equipmentTypeId: input.equipmentTypeId,
-      equipmentTypeDesc: input.equipmentTypeDesc,
+      equipmentTypeDesc: '',
       softwareModuleId: input.softwareModuleId ?? null,
-      softwareModuleDesc: input.softwareModuleDesc ?? null,
+      softwareModuleDesc: null,
       softwareEnvironmentId: input.softwareEnvironmentId ?? null,
-      softwareEnvironmentDesc: input.softwareEnvironmentDesc ?? null,
+      softwareEnvironmentDesc: null,
       hardwareEquipmentId: input.hardwareEquipmentId ?? null,
-      hardwareEquipmentDesc: input.hardwareEquipmentDesc ?? null,
+      hardwareEquipmentDesc: null,
       priorityId: input.priorityId ?? null,
-      priorityDesc: input.priorityDesc ?? null,
+      priorityDesc: null,
       serviceTypeId: input.serviceTypeId ?? null,
-      serviceTypeDesc: input.serviceTypeDesc ?? null,
+      serviceTypeDesc: null,
       caseDetails: input.caseDetails,
-      technician: null,
+      technician: input.technician ?? null,
       location: input.location ?? null,
       client: input.client ?? null,
       countryDesc: null,
@@ -91,6 +92,7 @@ export class CaseRepositoryImpl implements CaseRepository {
     };
 
     try {
+      console.log('[DEBUG] CaseRepositoryImpl.create — guardando en local DB, id:', id);
       await this.local.putCase(newCase);
       const op: PendingOperation = {
         id: this.idGen(),
@@ -104,8 +106,10 @@ export class CaseRepositoryImpl implements CaseRepository {
         createdAt: timestamp,
       };
       await this.local.enqueue(op);
+      console.log('[DEBUG] CaseRepositoryImpl.create — OK, caso creado localmente:', id);
       return ok(newCase);
     } catch (e) {
+      console.log('[DEBUG] CaseRepositoryImpl.create — ERROR:', String(e));
       return err(unknownError('No se pudo crear el caso', e));
     }
   }

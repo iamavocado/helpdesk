@@ -17,6 +17,7 @@ import type { FileToUpload } from '@/domain';
 import type { ApiClient, GetCasesParams, PagedDto } from './api-client';
 import { ApiError } from './api-error';
 import { withAuthRetry } from './with-auth-retry';
+import { logger } from '@/core/logger';
 
 /**
  * Cliente HTTP contra la API real DOZZIER (HelpDesk.Api).
@@ -186,6 +187,12 @@ export class HttpApiClient implements ApiClient {
 
   /** Petición cruda que desempaqueta ApiRespuesta y valida `exitoso`. */
   private async call<T>(path: string, init?: RequestInit, token?: string | null): Promise<T> {
+    const method = init?.method ?? 'GET';
+    logger.info(`API ${method} ${path}`, {
+      method,
+      path,
+      hasToken: !!token,
+    });
     let res: Response;
     try {
       res = await fetch(`${this.baseUrl}${path}`, {
@@ -198,13 +205,22 @@ export class HttpApiClient implements ApiClient {
         },
       });
     } catch (cause) {
+      logger.error(`API ${method} ${path} — fallo de red`, { error: String(cause) });
       throw new ApiError(0, `Fallo de red: ${String(cause)}`);
     }
-    if (!res.ok) throw new ApiError(res.status, `HTTP ${res.status} en ${path}`);
+    if (!res.ok) {
+      logger.warn(`API ${method} ${path} — HTTP ${res.status}`, { status: res.status });
+      throw new ApiError(res.status, `HTTP ${res.status} en ${path}`);
+    }
     const body = (await res.json()) as ApiRespuesta<T>;
     if (body && body.exitoso === false) {
+      logger.warn(`API ${method} ${path} — exitoso=false`, {
+        codigoEstado: body.codigoEstado,
+        mensaje: body.mensaje,
+      });
       throw new ApiError(body.codigoEstado || 400, body.mensaje ?? 'Error de la API');
     }
+    logger.info(`API ${method} ${path} — OK`);
     return body.datos;
   }
 
@@ -226,7 +242,9 @@ export class HttpApiClient implements ApiClient {
       }),
     });
     const claims = decodeJwt(datos.token);
+    console.log('[DEBUG] JWT claims decodificadas:', JSON.stringify(claims, null, 2));
     const name =
+      str(claims['StrUserFullName']) ??
       str(claims['name']) ??
       str(claims['unique_name']) ??
       str(claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']) ??
@@ -274,26 +292,12 @@ export class HttpApiClient implements ApiClient {
   }
 
   async createCase(dto: CreateCaseDto): Promise<CaseDto> {
+    console.log('[DEBUG] HttpApiClient.createCase — dto:', JSON.stringify(dto));
     const d = await this.authed<ApiCaseDetail>('/api/Case', {
       method: 'POST',
-      body: JSON.stringify({
-        equipmentTypeId: dto.EquipmentTypeId,
-        softwareModuleId: dto.SoftwareModuleId,
-        softwareEnvironmentId: dto.SoftwareEnvironmentId,
-        hardwareEquipmentId: dto.HardwareEquipmentId,
-        serviceTypeId: dto.ServiceTypeId,
-        priorityId: dto.PriorityId,
-        caseDetails: dto.CaseDetails,
-        client: dto.Client,
-        userRequester: dto.UserRequester,
-        emailRequester: dto.EmailRequester,
-        reportingUser: dto.ReportingUser,
-        reportingUserEmail: dto.ReportingUserEmail,
-        location: dto.Location,
-        countryId: dto.CountryId,
-        departmentId: dto.DepartmentId,
-      }),
+      body: JSON.stringify(dto),
     });
+    console.log('[DEBUG] HttpApiClient.createCase — respuesta:', JSON.stringify(d));
     return this.detailToCaseDto(d);
   }
 
@@ -422,6 +426,13 @@ export class HttpApiClient implements ApiClient {
     caseServerId: number,
     file: FileToUpload,
   ): Promise<AttachmentDto> {
+    logger.info('API POST /api/CasesCommentsAttach/upload-file', {
+      commentServerId,
+      caseServerId,
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.mimeType,
+    });
     const form = new FormData();
     form.append('IdCaseComment', String(commentServerId));
     form.append('IdCase', String(caseServerId));
@@ -445,13 +456,26 @@ export class HttpApiClient implements ApiClient {
             body: form,
           });
         } catch (cause) {
+          logger.error('API POST /api/CasesCommentsAttach/upload-file — fallo de red', {
+            error: String(cause),
+          });
           throw new ApiError(0, `Fallo de red: ${String(cause)}`);
         }
-        if (!res.ok) throw new ApiError(res.status, `HTTP ${res.status} al subir el adjunto`);
+        if (!res.ok) {
+          logger.warn('API POST /api/CasesCommentsAttach/upload-file — HTTP ' + res.status, {
+            status: res.status,
+          });
+          throw new ApiError(res.status, `HTTP ${res.status} al subir el adjunto`);
+        }
         const body = (await res.json()) as ApiRespuesta<ApiAttachment>;
         if (body && body.exitoso === false) {
+          logger.warn('API POST /api/CasesCommentsAttach/upload-file — exitoso=false', {
+            codigoEstado: body.codigoEstado,
+            mensaje: body.mensaje,
+          });
           throw new ApiError(body.codigoEstado || 400, body.mensaje ?? 'Error al subir el adjunto');
         }
+        logger.info('API POST /api/CasesCommentsAttach/upload-file — OK');
         return body.datos;
       },
       { getToken: this.getToken, refresh: this.refreshToken },

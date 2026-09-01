@@ -64,7 +64,10 @@ export function CustomTabBar({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Crear caso"
-        onPress={onFabPress}
+        onPress={() => {
+          console.log('[DEBUG] FAB presionado — navegando a NewCase');
+          onFabPress();
+        }}
         style={styles.fab}
       >
         <Ionicons name="add" size={26} color={colors.white} />

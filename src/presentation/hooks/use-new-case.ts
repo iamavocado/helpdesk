@@ -47,18 +47,24 @@ export function useNewCase(): NewCaseData {
 
   const submit = useCallback(
     async (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>): Promise<boolean> => {
+      console.log('[DEBUG] useNewCase.submit — input recibido:', JSON.stringify(input));
       setSubmitting(true);
       const result = await caseRepository.create(input);
+      console.log('[DEBUG] useNewCase.submit — result after create:', JSON.stringify(result));
       // Comentario inicial opcional, encolado contra el caso recién creado.
       if (isOk(result) && comment) {
+        console.log('[DEBUG] useNewCase.submit — agregando comentario inicial');
         await commentRepository.add({ ...comment, caseId: result.value.id });
       }
       // Empuja de inmediato al servidor (crea el caso y su comentario). Si no hay
       // red, la operación queda en cola y se reintenta al volver a primer plano.
       if (isOk(result)) {
+        console.log('[DEBUG] useNewCase.submit — llamando syncEngine.drain()');
         await syncEngine.drain();
+        console.log('[DEBUG] useNewCase.submit — syncEngine.drain() completado');
       }
       setSubmitting(false);
+      console.log('[DEBUG] useNewCase.submit — final, isOk:', isOk(result));
       return isOk(result);
     },
     [caseRepository, commentRepository, syncEngine],

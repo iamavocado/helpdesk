@@ -61,29 +61,27 @@ export interface Case {
  */
 export interface NewCaseInput {
   equipmentTypeId: number;
-  equipmentTypeDesc: string;
   softwareModuleId?: number | null;
-  softwareModuleDesc?: string | null;
   softwareEnvironmentId?: number | null;
-  softwareEnvironmentDesc?: string | null;
   hardwareEquipmentId?: number | null;
-  hardwareEquipmentDesc?: string | null;
   serviceTypeId?: number | null;
-  serviceTypeDesc?: string | null;
   priorityId?: number | null;
-  priorityDesc?: string | null;
   caseDetails: string;
   client?: string | null;
   /** Solicitante = username de login. La API lo exige y filtra los casos por él. */
   userRequester?: string | null;
   emailRequester?: string | null;
-  reportingUser?: string | null;
-  reportingUserEmail?: string | null;
   location?: string | null;
   countryId?: number | null;
-  countryDesc?: string | null;
   departmentId?: number | null;
-  departmentDesc?: string | null;
+  /** Nuevos campos requeridos por el endpoint */
+  statusCaseId?: number | null;
+  classificationCaseId?: number | null;
+  serial?: string | null;
+  technician?: string | null;
+  positionRequester?: string | null;
+  departmentRequester?: string | null;
+  subDepartment?: string | null;
 }
 
 /**

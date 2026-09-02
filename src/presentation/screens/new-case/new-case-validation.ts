@@ -2,6 +2,7 @@ export interface NewCaseDraft {
   client: string;
   reportingUser: string;
   endUserEmail: string;
+  requesterEmail: string;
   departamento: string;
   cargo: string;
   equipmentTypeId: number | undefined;
@@ -29,6 +30,9 @@ export function validateNewCase(draft: NewCaseDraft): NewCaseErrors {
     errors.caseDetails = 'Describe el caso (mín. 5 caracteres)';
   if (draft.endUserEmail.trim() && !EMAIL_RE.test(draft.endUserEmail.trim())) {
     errors.endUserEmail = 'Correo no válido';
+  }
+  if (draft.requesterEmail.trim() && !EMAIL_RE.test(draft.requesterEmail.trim())) {
+    errors.requesterEmail = 'Correo no válido';
   }
   return errors;
 }

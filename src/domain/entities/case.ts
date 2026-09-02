@@ -71,6 +71,10 @@ export interface NewCaseInput {
   /** Solicitante = username de login. La API lo exige y filtra los casos por él. */
   userRequester?: string | null;
   emailRequester?: string | null;
+  /** Oficina o usuario que reporta. */
+  reportingUser?: string | null;
+  /** Correo del usuario final que reporta. */
+  reportingUserEmail?: string | null;
   location?: string | null;
   countryId?: number | null;
   departmentId?: number | null;

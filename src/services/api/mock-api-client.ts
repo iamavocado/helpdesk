@@ -65,6 +65,8 @@ export class MockApiClient implements ApiClient {
         name: this.displayName(username),
         email: `${username}@ita-sa.com`,
         role: 'Usuario',
+        departmentName: 'IT',
+        jobFunction: 'Usuario',
       },
     };
   }

@@ -23,6 +23,10 @@ export interface NewCaseScreenProps {
   userEmail: string;
   /** Username de login: la API lo exige como solicitante y filtra los casos por él. */
   requesterUsername: string;
+  /** Departamento del usuario autenticado (fallback si el campo está vacío). */
+  userDepartmentName?: string | null;
+  /** Cargo del usuario autenticado (fallback si el campo está vacío). */
+  userJobFunction?: string | null;
   submitting?: boolean;
   onCancel: () => void;
   onSubmit: (input: NewCaseInput, comment?: Omit<NewCommentInput, 'caseId'>) => void;
@@ -39,9 +43,6 @@ const STATUS_OPTIONS = [
 
 const toOptions = (items: CatalogItem[]) =>
   items.map((i) => ({ label: i.description, value: i.id }));
-
-const descById = (items: CatalogItem[], id: number | undefined): string | null =>
-  items.find((i) => i.id === id)?.description ?? null;
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -68,7 +69,8 @@ export function NewCaseScreen({
   loadDepartments,
   userName,
   userEmail,
-  requesterUsername,
+  userDepartmentName,
+  userJobFunction,
   submitting = false,
   onCancel,
   onSubmit,
@@ -77,8 +79,9 @@ export function NewCaseScreen({
     client: '',
     reportingUser: '',
     endUserEmail: '',
-    departamento: '',
-    cargo: '',
+    requesterEmail: '',
+    departamento: userDepartmentName ?? '',
+    cargo: userJobFunction ?? '',
     equipmentTypeId: undefined,
     environmentId: undefined,
     moduleId: undefined,
@@ -138,7 +141,9 @@ export function NewCaseScreen({
       caseDetails,
       client: draft.client || null,
       userRequester: userName,
-      emailRequester: userEmail || null,
+      emailRequester: draft.requesterEmail.trim() || userEmail || null,
+      reportingUser: draft.reportingUser.trim() || null,
+      reportingUserEmail: draft.endUserEmail.trim() || null,
       softwareModuleId: isSoftware ? (draft.moduleId ?? null) : null,
       softwareEnvironmentId: isSoftware ? (draft.environmentId ?? null) : null,
       hardwareEquipmentId: isHardware ? (draft.hardwareEquipmentId ?? null) : null,
@@ -151,8 +156,8 @@ export function NewCaseScreen({
       classificationCaseId: 1,
       serial: draft.referenceNumber.trim() || null,
       technician: userName,
-      positionRequester: draft.cargo || null,
-      departmentRequester: draft.departamento || null,
+      positionRequester: draft.cargo || userJobFunction || null,
+      departmentRequester: draft.departamento || userDepartmentName || null,
     };
 
     const initialComment = commentBody.trim()
@@ -196,7 +201,13 @@ export function NewCaseScreen({
           onChange={(value) => set('client', value)}
         />
         <Input label="Solicitante" readonly value={userName} />
-        <Input label="Correo electrónico del solicitante" readonly value={userEmail} />
+        <Input
+          label="Correo electrónico del solicitante"
+          placeholder="correo@ejemplo.com"
+          value={draft.requesterEmail}
+          error={errors.requesterEmail}
+          onChangeText={(v) => set('requesterEmail', v)}
+        />
         <Input label="Fecha de creación" readonly value={formatDateTime(Date.now())} />
         <Input
           label="Oficina o usuario que reporta"

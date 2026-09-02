@@ -143,6 +143,8 @@ export function newCaseToCreateDto(input: NewCaseInput): CreateCaseDto {
     emailRequester: input.emailRequester ?? null,
     positionRequester: input.positionRequester ?? null,
     departmentRequester: input.departmentRequester ?? null,
+    reportingUser: input.reportingUser ?? null,
+    reportingUserEmail: input.reportingUserEmail ?? null,
     softwareModuleId: input.softwareModuleId ?? null,
     softwareEnvironmentId: input.softwareEnvironmentId ?? null,
     hardwareEquipmentId: input.hardwareEquipmentId ?? null,

@@ -257,11 +257,13 @@ export class HttpApiClient implements ApiClient {
       str(claims['role']) ??
       str(claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']) ??
       null;
+    const departmentName = str(claims['StrDepartmentName']) ?? null;
+    const jobFunction = str(claims['StrJobFunction']) ?? null;
     // La API no expone refresh token: se guarda vacío → en 401 se fuerza re-login.
     return {
       accessToken: datos.token,
       refreshToken: '',
-      user: { username: body.username, name, email, role },
+      user: { username: body.username, name, email, role, departmentName, jobFunction },
     };
   }
 
@@ -292,10 +294,15 @@ export class HttpApiClient implements ApiClient {
   }
 
   async createCase(dto: CreateCaseDto): Promise<CaseDto> {
-    console.log('[DEBUG] HttpApiClient.createCase — dto:', JSON.stringify(dto));
+    // Limpia campos nulos/vacíos: el backend usa AgregarSiNoVacio,
+    // no tolera que llegue el campo con valor null.
+    const cleaned = Object.fromEntries(
+      Object.entries(dto).filter(([, v]) => v !== null && v !== undefined && v !== ''),
+    ) as CreateCaseDto;
+    console.log('[DEBUG] HttpApiClient.createCase — dto:', JSON.stringify(cleaned));
     const d = await this.authed<ApiCaseDetail>('/api/Case', {
       method: 'POST',
-      body: JSON.stringify(dto),
+      body: JSON.stringify(cleaned),
     });
     console.log('[DEBUG] HttpApiClient.createCase — respuesta:', JSON.stringify(d));
     return this.detailToCaseDto(d);

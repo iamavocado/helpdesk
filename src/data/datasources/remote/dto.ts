@@ -65,6 +65,8 @@ export interface CreateCaseDto {
   emailRequester: string | null;
   positionRequester: string | null;
   departmentRequester: string | null;
+  reportingUser: string | null;
+  reportingUserEmail: string | null;
   softwareModuleId: number | null;
   softwareEnvironmentId: number | null;
   hardwareEquipmentId: number | null;
@@ -140,6 +142,8 @@ export interface AuthUserDto {
   name: string;
   email: string;
   role?: string | null;
+  departmentName?: string | null;
+  jobFunction?: string | null;
 }
 
 export interface AuthTokensDto {

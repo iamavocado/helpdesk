@@ -24,6 +24,19 @@ describe('LoginScreen', () => {
     expect(onSubmit).toHaveBeenCalledWith({ username: 'saulo', password: 'dozzier' });
   });
 
+  it('alterna la visibilidad de la contraseña con el botón de ojo', () => {
+    const { getByLabelText } = render(<LoginScreen onSubmit={jest.fn()} />);
+
+    const passwordInput = getByLabelText('Contraseña');
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+
+    fireEvent.press(getByLabelText('Mostrar contraseña'));
+    expect(passwordInput.props.secureTextEntry).toBe(false);
+
+    fireEvent.press(getByLabelText('Ocultar contraseña'));
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+  });
+
   it('muestra el mensaje de error del servidor', () => {
     const { getByText } = render(
       <LoginScreen onSubmit={jest.fn()} errorMessage="Usuario o contraseña incorrectos" />,

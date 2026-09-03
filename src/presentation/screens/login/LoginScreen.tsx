@@ -1,5 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 import { Button, Input, Text, colors, spacing } from '@/design-system';
 import type { Credentials } from '@/domain';
@@ -19,6 +27,7 @@ export interface LoginScreenProps {
 export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginScreenProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
 
   const handleSubmit = (): void => {
@@ -66,16 +75,33 @@ export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginSc
           error={errors.username}
           editable={!loading}
         />
-        <Input
-          label="Contraseña"
-          required
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          placeholder="••••••••"
-          error={errors.password}
-          editable={!loading}
-        />
+        <View style={styles.passwordField}>
+          <Input
+            label="Contraseña"
+            required
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="••••••••"
+            error={errors.password}
+            editable={!loading}
+            style={styles.passwordInput}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            hitSlop={8}
+            disabled={loading}
+            onPress={() => setShowPassword((v) => !v)}
+            style={styles.toggle}
+          >
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color={colors.inkFaint}
+            />
+          </Pressable>
+        </View>
 
         <Button
           title={loading ? 'Ingresando…' : 'Ingresar'}
@@ -108,6 +134,9 @@ const styles = StyleSheet.create({
     padding: spacing['2xl'],
     marginBottom: spacing['4xl'],
   },
+  passwordField: { position: 'relative' },
+  passwordInput: { paddingRight: 44 },
+  toggle: { position: 'absolute', right: 12, top: 28 },
   submit: { marginTop: spacing.md },
   spinner: { marginTop: spacing['2xl'] },
 });

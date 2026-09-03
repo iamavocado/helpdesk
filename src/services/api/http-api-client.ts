@@ -51,6 +51,7 @@ interface Paginado<T> {
 /** Caso liviano (lista) tal como lo devuelve la API. */
 interface ApiCaseList {
   id: number;
+  idCaseClient: number;
   userRequester: string | null;
   emailRequester: string | null;
   creationDate: string | null;
@@ -86,6 +87,16 @@ interface ApiCaseDetail extends ApiCaseList {
   departmentDesc: string | null;
   reportingUser: string | null;
   reportingUserEmail: string | null;
+  serial: string | null;
+  positionRequester: string | null;
+  departmentRequester: string | null;
+  subDepartment: string | null;
+  statusCaseSubStatusId: number | null;
+  statusCaseSubStatusDesc: string | null;
+  technicianNotificationSent: boolean | null;
+  storeRoomRequiredReplacement: boolean | null;
+  storeRoomRequestDetail: string | null;
+  technicianFirstAssign: string | null;
 }
 
 interface ApiComment {
@@ -534,6 +545,7 @@ export class HttpApiClient implements ApiClient {
   private listToCaseDto(c: ApiCaseList): CaseDto {
     return {
       Id: c.id,
+      IdCaseClient: c.idCaseClient,
       UserRequester: c.userRequester,
       EmailRequester: c.emailRequester,
       ReportingUser: null,
@@ -583,6 +595,16 @@ export class HttpApiClient implements ApiClient {
       HardwareEquipmentDesc: c.hardwareEquipmentDesc,
       CountryDesc: c.countryDesc,
       DepartmentDesc: c.departmentDesc,
+      Serial: c.serial,
+      PositionRequester: c.positionRequester,
+      DepartmentRequester: c.departmentRequester,
+      SubDepartment: c.subDepartment,
+      StatusCaseSubStatusId: c.statusCaseSubStatusId,
+      StatusCaseSubStatusDesc: c.statusCaseSubStatusDesc,
+      TechnicianNotificationSent: c.technicianNotificationSent,
+      StoreRoomRequiredReplacement: c.storeRoomRequiredReplacement,
+      StoreRoomRequestDetail: c.storeRoomRequestDetail,
+      TechnicianFirstAssign: c.technicianFirstAssign,
     };
   }
 

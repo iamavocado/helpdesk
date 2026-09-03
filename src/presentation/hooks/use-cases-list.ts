@@ -55,6 +55,7 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
         pageSize: PAGE_SIZE,
       });
       if (!isOk(result)) return;
+      console.log('[DEBUG] useCasesList — items recibidos:', JSON.stringify(result.value.items.slice(0, 3), null, 2));
       setTotal(result.value.total);
       setPage(targetPage);
       setItems((prev) =>

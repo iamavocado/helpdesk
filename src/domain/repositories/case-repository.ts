@@ -54,9 +54,13 @@ export interface CaseRepository {
   reassign(id: string, input: ReassignInput): Promise<Result<Case, DomainError>>;
 
   /**
+  /**
    * Refresca la caché local desde el servidor (pull completo paginado).
    * Con `force=false` aplica un throttle para no repetir el pull en cada foco.
    * No falla si no hay red.
    */
   refresh(force?: boolean): Promise<Result<void, DomainError>>;
+
+  /** Actualiza un caso en la BD local (para merge del detalle remoto). */
+  updateLocal(c: Case): Promise<Result<Case, DomainError>>;
 }

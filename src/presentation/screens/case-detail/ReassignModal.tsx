@@ -121,7 +121,11 @@ export function ReassignModal({ visible, caseItem, onClose, onDone }: ReassignMo
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              <Input label="Número de caso" readonly value={`Caso #${caseItem.serverId ?? '—'}`} />
+              <Input
+                label="Número de caso"
+                readonly
+                value={`Caso #${caseItem.caseClientId ?? '—'}`}
+              />
               <Select
                 label="Asignar a"
                 required

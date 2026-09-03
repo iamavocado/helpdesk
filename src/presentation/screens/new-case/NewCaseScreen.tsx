@@ -224,18 +224,8 @@ export function NewCaseScreen({
           onChangeText={(v) => set('endUserEmail', v)}
           error={errors.endUserEmail}
         />
-        <Input
-          label="Departamento"
-          placeholder="Ej: HELPDESK"
-          value={draft.departamento}
-          onChangeText={(v) => set('departamento', v)}
-        />
-        <Input
-          label="Cargo"
-          placeholder="Ej: Administración"
-          value={draft.cargo}
-          onChangeText={(v) => set('cargo', v)}
-        />
+        <Input label="Departamento" readonly value={draft.departamento} />
+        <Input label="Cargo" readonly value={draft.cargo} />
 
         <Select
           label="Categoría"

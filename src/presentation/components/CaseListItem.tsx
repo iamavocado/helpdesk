@@ -27,7 +27,7 @@ export function CaseListItem({ item, onPress, now }: CaseListItemProps) {
       <View style={styles.header}>
         <View style={styles.flex}>
           <Text variant="caption" color={colors.inkFaint}>
-            {item.serverId != null ? `Caso #${item.serverId}` : 'Pendiente de número'}
+            {item.caseClientId != null ? `Caso #${item.caseClientId}` : 'Pendiente de número'}
           </Text>
           <Text variant="bodyStrong" color={colors.ink} numberOfLines={2}>
             {title}

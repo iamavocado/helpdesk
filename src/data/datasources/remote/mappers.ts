@@ -30,6 +30,7 @@ export function dtoToCase(dto: CaseDto): Case {
   return {
     id: serverLocalId(dto.Id),
     serverId: dto.Id,
+    caseClientId: dto.IdCaseClient ?? dto.Id,
     userRequester: dto.UserRequester ?? '',
     requesterEmail: dto.EmailRequester,
     reportingUser: dto.ReportingUser,
@@ -60,6 +61,16 @@ export function dtoToCase(dto: CaseDto): Case {
     client: dto.Client,
     countryDesc: dto.CountryDesc,
     departmentDesc: dto.DepartmentDesc,
+    serial: dto.Serial,
+    positionRequester: dto.PositionRequester,
+    departmentRequester: dto.DepartmentRequester,
+    subDepartment: dto.SubDepartment,
+    statusCaseSubStatusId: dto.StatusCaseSubStatusId,
+    statusCaseSubStatusDesc: dto.StatusCaseSubStatusDesc,
+    technicianNotificationSent: dto.TechnicianNotificationSent ?? false,
+    storeRoomRequiredReplacement: dto.StoreRoomRequiredReplacement ?? false,
+    storeRoomRequestDetail: dto.StoreRoomRequestDetail,
+    technicianFirstAssign: dto.TechnicianFirstAssign,
     syncStatus: 'synced',
   };
 }

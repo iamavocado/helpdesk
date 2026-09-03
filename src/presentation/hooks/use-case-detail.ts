@@ -59,9 +59,26 @@ export function useCaseDetail(caseId: string): CaseDetailData {
 
   const loadAll = useCallback(async () => {
     setLoading(true);
+    const { caseRepository, remote } = getContainer();
     const caseResult = await caseRepository.getById(caseId);
-    const current = isOk(caseResult) ? caseResult.value : null;
-    if (current) setCaseItem(current);
+    let current = isOk(caseResult) ? caseResult.value : null;
+
+    // Fetch del detalle remoto para traer todos los campos completos
+    if (current?.serverId != null) {
+      try {
+        const detail = await remote.fetchCase(current.serverId);
+        const merged = { ...current, ...detail, id: current.id };
+        await caseRepository.updateLocal(merged);
+        current = merged;
+      } catch {
+        // Sin red: se muestran los datos locales
+      }
+    }
+
+    if (current) {
+      console.log('[DEBUG] useCaseDetail — caso cargado:', JSON.stringify(current, null, 2));
+      setCaseItem(current);
+    }
     await commentRepository.refresh(caseId);
     await loadComments();
     setLoading(false);

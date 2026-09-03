@@ -225,4 +225,13 @@ export class CaseRepositoryImpl implements CaseRepository {
       return err(e instanceof DomainError ? e : unknownError('Fallo al refrescar casos', e));
     }
   }
+
+  async updateLocal(c: Case): Promise<Result<Case, DomainError>> {
+    try {
+      await this.local.putCase(c);
+      return ok(c);
+    } catch (e) {
+      return err(unknownError('No se pudo actualizar el caso local', e));
+    }
+  }
 }

@@ -64,6 +64,7 @@ export class SyncEngine {
       const local = await this.local.getCaseById(op.entityId);
       if (!local) return true; // el caso ya no existe localmente: se descarta
       const created = await this.remote.createCase(op.payload as NewCaseInput);
+      console.log('[DEBUG] SyncEngine.process — case created on server:', JSON.stringify(created));
       await this.local.putCase({ ...local, serverId: created.serverId, syncStatus: 'synced' });
       return true;
     }

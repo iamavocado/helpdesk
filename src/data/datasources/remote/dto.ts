@@ -5,6 +5,7 @@
  */
 export interface CaseDto {
   Id: number;
+  IdCaseClient: number;
   UserRequester: string | null;
   EmailRequester: string | null;
   ReportingUser: string | null;
@@ -34,6 +35,16 @@ export interface CaseDto {
   Client: string | null;
   CountryDesc: string | null;
   DepartmentDesc: string | null;
+  Serial: string | null;
+  PositionRequester: string | null;
+  DepartmentRequester: string | null;
+  SubDepartment: string | null;
+  StatusCaseSubStatusId: number | null;
+  StatusCaseSubStatusDesc: string | null;
+  TechnicianNotificationSent: boolean | null;
+  StoreRoomRequiredReplacement: boolean | null;
+  StoreRoomRequestDetail: string | null;
+  TechnicianFirstAssign: string | null;
 }
 
 export interface CommentDto {

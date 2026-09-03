@@ -8,6 +8,8 @@ import type { Classification, SyncStatus } from '../value-objects';
 export interface Case {
   id: string;
   serverId: number | null;
+  /** ID visible para el cliente (idCaseClient del servidor). */
+  caseClientId: number | null;
 
   // Solicitante / reporte
   userRequester: string;
@@ -50,6 +52,18 @@ export interface Case {
   client: string | null;
   countryDesc: string | null;
   departmentDesc: string | null;
+
+  // Campos adicionales del detalle
+  serial?: string | null;
+  positionRequester?: string | null;
+  departmentRequester?: string | null;
+  subDepartment?: string | null;
+  statusCaseSubStatusId?: number | null;
+  statusCaseSubStatusDesc?: string | null;
+  technicianNotificationSent?: boolean | null;
+  storeRoomRequiredReplacement?: boolean | null;
+  storeRoomRequestDetail?: string | null;
+  technicianFirstAssign?: string | null;
 
   // Sincronización (solo cliente)
   syncStatus: SyncStatus;

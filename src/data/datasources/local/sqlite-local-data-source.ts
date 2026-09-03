@@ -95,7 +95,7 @@ export class SqliteLocalDataSource implements LocalDataSource {
     await db.runAsync(
       `INSERT OR REPLACE INTO cases (id, server_id, classification, creation_date, sync_status, data)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [c.id, c.serverId, c.classification, c.creationDate, c.syncStatus, JSON.stringify(c)],
+      [c.id, c.serverId ?? 0, c.classification, c.creationDate, c.syncStatus, JSON.stringify(c)],
     );
   }
 

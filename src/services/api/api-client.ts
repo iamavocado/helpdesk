@@ -71,6 +71,8 @@ export interface ApiClient {
   searchCases(params: SearchCasesParams): Promise<PagedDto<CaseDto>>;
   /** Conteo de casos por estado (GET /api/Case/por-status-count). */
   getStatusCounts(): Promise<StatusCountDto[]>;
+  /** Últimos casos del usuario (GET /api/Case/recientes). */
+  getRecentCases(): Promise<PagedDto<CaseDto>>;
   /** Subestados detallados (StatusCaseSubStatus: En desarrollo, En validación…). */
   getStatusCaseSubStatuses(): Promise<CatalogItemDto[]>;
   /** Actualiza/reasigna un caso (PUT). Devuelve el caso actualizado. */

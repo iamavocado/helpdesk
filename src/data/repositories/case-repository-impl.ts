@@ -235,6 +235,14 @@ export class CaseRepositoryImpl implements CaseRepository {
     }
   }
 
+  async getRecentCases(): Promise<Result<Case[], DomainError>> {
+    try {
+      return ok(await this.remote.fetchRecentCases());
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('Error al obtener casos recientes', e));
+    }
+  }
+
   async refresh(force = false): Promise<Result<void, DomainError>> {
     try {
       const last = await this.local.getLastPulledAt(CASES_TABLE);

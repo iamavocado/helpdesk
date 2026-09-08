@@ -71,6 +71,8 @@ export interface RemoteDataSource {
   fetchMembers(department: string, jfg: string): Promise<Member[]>;
   /** Conteo de casos por estado (GET /api/Case/por-status-count). */
   fetchStatusCounts(): Promise<StatusCount[]>;
+  /** Últimos casos del usuario (GET /api/Case/recientes). */
+  fetchRecentCases(): Promise<Case[]>;
   fetchStatusCaseSubStatuses(): Promise<CatalogItem[]>;
   updateCase(current: Case, input: ReassignInput): Promise<Case>;
   updateCaseStatus(current: Case, statusCaseId: number, statusCaseDesc: string): Promise<Case>;
@@ -209,6 +211,17 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       return await this.api.getStatusCounts();
     } catch (e) {
       logger.error('RemoteDataSource.fetchStatusCounts — error', { error: String(e) });
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchRecentCases(): Promise<Case[]> {
+    logger.info('RemoteDataSource.fetchRecentCases');
+    try {
+      const page = await this.api.getRecentCases();
+      return page.items.map(dtoToCase);
+    } catch (e) {
+      logger.error('RemoteDataSource.fetchRecentCases — error', { error: String(e) });
       throw toDomainError(e);
     }
   }

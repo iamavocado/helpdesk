@@ -262,6 +262,16 @@ export class MockApiClient implements ApiClient {
     }));
   }
 
+  async getRecentCases(): Promise<PagedDto<CaseDto>> {
+    await this.delay();
+    // Últimos 20 casos ordenados por fecha de creación (descendente).
+    const sorted = [...this.cases].sort(
+      (a, b) => Date.parse(b.CreationDate) - Date.parse(a.CreationDate),
+    );
+    const items = sorted.slice(0, 20);
+    return { items, page: 1, pageSize: 20, total: items.length };
+  }
+
   async getMembers(): Promise<MemberDto[]> {
     await this.delay();
     // Lista demo equivalente a la del portal (en real viene de Ultimus/AD).

@@ -37,7 +37,7 @@ function categorizeCounts(counts: StatusCount[]): HomeCounts {
   return result;
 }
 
-/** Carga conteos del servidor y casos recientes de la BD local. */
+/** Carga conteos del servidor y casos recientes del servidor. */
 export function useHomeData(): HomeData {
   const repo = getContainer().caseRepository;
   const [cases, setCases] = useState<Case[]>([]);
@@ -52,9 +52,9 @@ export function useHomeData(): HomeData {
         setCounts(categorizeCounts(countsResult.value));
       }
 
-      // 2) Casos recientes desde la BD local (instantáneo, sin descarga masiva).
-      const cached = await repo.list({ page: 1, pageSize: 4 });
-      if (isOk(cached)) setCases(cached.value.items);
+      // 2) Casos recientes desde el servidor (GET /api/Case/recientes).
+      const recentResult = await repo.getRecentCases();
+      if (isOk(recentResult)) setCases(recentResult.value);
     },
     [repo],
   );

@@ -327,6 +327,16 @@ export class HttpApiClient implements ApiClient {
     return this.authed<StatusCountDto[]>('/api/Case/por-status-count');
   }
 
+  async getRecentCases(): Promise<PagedDto<CaseDto>> {
+    const list = await this.authed<ApiCaseList[]>('/api/Case/recientes');
+    return {
+      items: (list ?? []).map((c) => this.listToCaseDto(c)),
+      page: 1,
+      pageSize: list?.length ?? 0,
+      total: list?.length ?? 0,
+    };
+  }
+
   async getCase(serverId: number): Promise<CaseDto> {
     const d = await this.authed<ApiCaseDetail>(`/api/Case/${serverId}`);
     return this.detailToCaseDto(d);

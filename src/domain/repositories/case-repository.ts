@@ -78,6 +78,9 @@ export interface CaseRepository {
   /** Conteo de casos por estado (GET /api/Case/por-status-count). */
   getStatusCounts(): Promise<Result<StatusCount[], DomainError>>;
 
+  /** Últimos casos del usuario (GET /api/Case/recientes). */
+  getRecentCases(): Promise<Result<Case[], DomainError>>;
+
   /**
   /**
    * Refresca la caché local desde el servidor (pull completo paginado).

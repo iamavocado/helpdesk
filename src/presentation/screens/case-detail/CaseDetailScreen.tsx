@@ -366,7 +366,12 @@ export function CaseDetailScreen({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { paddingBottom: 60 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
   header: {
     backgroundColor: colors.brandDark,
     paddingTop: 56,

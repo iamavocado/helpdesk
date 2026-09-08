@@ -13,6 +13,8 @@ import {
   type ReassignInput,
   type ReassignOptions,
   type Result,
+  type SearchCasesParams,
+  type StatusCount,
 } from '@/domain';
 
 import { mergeServerCase, type LocalDataSource } from '../datasources/local';
@@ -43,6 +45,18 @@ export class CaseRepositoryImpl implements CaseRepository {
       return ok(await this.local.listCases(params));
     } catch (e) {
       return err(unknownError('No se pudo listar casos', e));
+    }
+  }
+
+  async fetchFromApi(params: ListCasesParams): Promise<Result<PagedCases, DomainError>> {
+    try {
+      const page = await this.remote.fetchCases({
+        page: params.page ?? 1,
+        pageSize: params.pageSize ?? 10,
+      });
+      return ok(page);
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('No se pudieron cargar casos', e));
     }
   }
 
@@ -179,7 +193,16 @@ export class CaseRepositoryImpl implements CaseRepository {
 
   async reassign(id: string, input: ReassignInput): Promise<Result<Case, DomainError>> {
     try {
-      const local = await this.local.getCaseById(id);
+      let local = await this.local.getCaseById(id);
+      // Si el caso no está en local (p. ej. se llegó desde lista/búsqueda sin
+      // persistir), se recupera el detalle del servidor por el serverId
+      // codificado en el id (`srv-<N>`) para construir el PUT.
+      if (!local && id.startsWith('srv-')) {
+        const serverId = Number(id.slice(4));
+        if (Number.isFinite(serverId) && serverId > 0) {
+          local = await this.remote.fetchCase(serverId);
+        }
+      }
       if (!local) return err(notFoundError(`Caso ${id} no encontrado`));
       if (local.serverId == null) {
         return err(unknownError('El caso aún no está sincronizado; no se puede reasignar'));
@@ -192,6 +215,23 @@ export class CaseRepositoryImpl implements CaseRepository {
       return ok(merged);
     } catch (e) {
       return err(e instanceof DomainError ? e : unknownError('No se pudo reasignar el caso', e));
+    }
+  }
+
+  async search(params: SearchCasesParams): Promise<Result<PagedCases, DomainError>> {
+    try {
+      const page = await this.remote.fetchSearchCases(params);
+      return ok(page);
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('Error al buscar casos', e));
+    }
+  }
+
+  async getStatusCounts(): Promise<Result<StatusCount[], DomainError>> {
+    try {
+      return ok(await this.remote.fetchStatusCounts());
+    } catch (e) {
+      return err(e instanceof DomainError ? e : unknownError('Error al obtener conteos', e));
     }
   }
 

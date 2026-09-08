@@ -2,17 +2,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { PlaceholderScreen } from '@/presentation/components';
 import { CasesContainer } from '@/presentation/screens/cases-list';
 import { HomeContainer } from '@/presentation/screens/home';
 import { ProfileScreen } from '@/presentation/screens/profile';
+import { SearchContainer } from '@/presentation/screens/search';
 
 import { CustomTabBar } from './CustomTabBar';
 import type { RootStackParamList, TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
-
-const SearchPlaceholder = () => <PlaceholderScreen title="Buscar" />;
 
 /** Pestañas inferiores con FAB central que abre "Nuevo caso". */
 export function AppTabs() {
@@ -25,7 +23,7 @@ export function AppTabs() {
     >
       <Tab.Screen name="Home" component={HomeContainer} />
       <Tab.Screen name="Cases" component={CasesContainer} />
-      <Tab.Screen name="Search" component={SearchPlaceholder} />
+      <Tab.Screen name="Search" component={SearchContainer} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

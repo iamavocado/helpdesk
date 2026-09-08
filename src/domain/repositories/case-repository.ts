@@ -1,5 +1,5 @@
 import type { DomainError } from '@/core/errors';
-import type { Case, CatalogItem, Member, NewCaseInput, ReassignInput } from '../entities';
+import type { Case, CatalogItem, Member, NewCaseInput, ReassignInput, StatusCount } from '../entities';
 import type { Classification, Result } from '../value-objects';
 
 /** Opciones que necesita el modal "Reasignar Caso" (cargadas bajo demanda). */
@@ -16,6 +16,22 @@ export interface ListCasesParams {
   pageSize?: number;
 }
 
+/** Parámetros de búsqueda de casos (GET /api/Case/filtrados). */
+export interface SearchCasesParams {
+  busqueda?: string;
+  page?: number;
+  pageSize?: number;
+  ordenarPor?: string;
+  ordenDescendente?: boolean;
+  client?: string;
+  statusCaseDesc?: string;
+  technician?: string;
+  userRequester?: string;
+  idCaseClient?: number;
+  nombreCompleto?: string;
+  creationDate?: string;
+}
+
 export interface PagedCases {
   items: Case[];
   page: number;
@@ -30,6 +46,9 @@ export interface PagedCases {
 export interface CaseRepository {
   /** Lista paginada desde la fuente local, filtrable por clasificación. */
   list(params: ListCasesParams): Promise<Result<PagedCases, DomainError>>;
+
+  /** Lista paginada desde el servidor (GET /api/Case). */
+  fetchFromApi(params: ListCasesParams): Promise<Result<PagedCases, DomainError>>;
 
   /** Obtiene un caso por id local. */
   getById(id: string): Promise<Result<Case, DomainError>>;
@@ -52,6 +71,12 @@ export interface CaseRepository {
 
   /** Reasigna un caso (técnico, estado, subestado, categoría, etc.) vía PUT. */
   reassign(id: string, input: ReassignInput): Promise<Result<Case, DomainError>>;
+
+  /** Búsqueda de casos en el servidor (GET /api/Case/filtrados). */
+  search(params: SearchCasesParams): Promise<Result<PagedCases, DomainError>>;
+
+  /** Conteo de casos por estado (GET /api/Case/por-status-count). */
+  getStatusCounts(): Promise<Result<StatusCount[], DomainError>>;
 
   /**
   /**

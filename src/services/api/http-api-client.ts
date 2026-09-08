@@ -10,11 +10,12 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
   MemberDto,
+  StatusCountDto,
   UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
 
-import type { ApiClient, GetCasesParams, PagedDto } from './api-client';
+import type { ApiClient, GetCasesParams, PagedDto, SearchCasesParams } from './api-client';
 import { ApiError } from './api-error';
 import { withAuthRetry } from './with-auth-retry';
 import { logger } from '@/core/logger';
@@ -297,6 +298,33 @@ export class HttpApiClient implements ApiClient {
       pageSize: page.tamanoPagina,
       total: page.totalRegistros,
     };
+  }
+
+  async searchCases(params: SearchCasesParams): Promise<PagedDto<CaseDto>> {
+    const q = new URLSearchParams();
+    q.set('numeroPagina', String(params.page ?? 1));
+    q.set('tamanoPagina', String(params.pageSize ?? 10));
+    if (params.busqueda) q.set('busqueda', params.busqueda);
+    if (params.ordenarPor) q.set('ordenarPor', params.ordenarPor);
+    if (params.ordenDescendente != null) q.set('ordenDescendente', String(params.ordenDescendente));
+    if (params.client) q.set('client', params.client);
+    if (params.statusCaseDesc) q.set('statusCaseDesc', params.statusCaseDesc);
+    if (params.technician) q.set('technician', params.technician);
+    if (params.userRequester) q.set('userRequester', params.userRequester);
+    if (params.idCaseClient != null) q.set('idCaseClient', String(params.idCaseClient));
+    if (params.nombreCompleto) q.set('nombreCompleto', params.nombreCompleto);
+    if (params.creationDate) q.set('creationDate', params.creationDate);
+    const page = await this.authed<Paginado<ApiCaseList>>(`/api/Case/filtrados?${q.toString()}`);
+    return {
+      items: (page.items ?? []).map((c) => this.listToCaseDto(c)),
+      page: page.numeroPagina,
+      pageSize: page.tamanoPagina,
+      total: page.totalRegistros,
+    };
+  }
+
+  async getStatusCounts(): Promise<StatusCountDto[]> {
+    return this.authed<StatusCountDto[]>('/api/Case/por-status-count');
   }
 
   async getCase(serverId: number): Promise<CaseDto> {

@@ -384,7 +384,12 @@ export function NewCaseScreen({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.screen, paddingTop: 56, paddingBottom: 60 },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
   title: { marginTop: spacing.lg },
   subtitle: { marginBottom: spacing['4xl'] },
   section: {

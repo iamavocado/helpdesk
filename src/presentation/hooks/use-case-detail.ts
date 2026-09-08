@@ -63,15 +63,18 @@ export function useCaseDetail(caseId: string): CaseDetailData {
     const caseResult = await caseRepository.getById(caseId);
     let current = isOk(caseResult) ? caseResult.value : null;
 
-    // Fetch del detalle remoto para traer todos los campos completos
-    if (current?.serverId != null) {
+    // Si no está en local pero el id es `srv-<N>`, extraemos el serverId.
+    // Si está en local y tiene serverId, lo usamos directamente.
+    const serverId = current?.serverId ?? (caseId.startsWith('srv-') ? Number(caseId.slice(4)) : null);
+
+    if (serverId != null && Number.isFinite(serverId) && serverId > 0) {
       try {
-        const detail = await remote.fetchCase(current.serverId);
-        const merged = { ...current, ...detail, id: current.id };
-        await caseRepository.updateLocal(merged);
+        const detail = await remote.fetchCase(serverId);
+        const merged = current ? { ...current, ...detail, id: current.id } : { ...detail, id: caseId };
+        if (current) await caseRepository.updateLocal(merged);
         current = merged;
       } catch {
-        // Sin red: se muestran los datos locales
+        // Sin red: se muestran los datos locales (si existen)
       }
     }
 
@@ -82,7 +85,7 @@ export function useCaseDetail(caseId: string): CaseDetailData {
     await commentRepository.refresh(caseId);
     await loadComments();
     setLoading(false);
-    await loadAttachments(current?.serverId); // en segundo plano: no bloquea la pantalla
+    await loadAttachments(current?.serverId);
   }, [caseRepository, commentRepository, caseId, loadComments, loadAttachments]);
 
   useEffect(() => {

@@ -9,6 +9,7 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
   MemberDto,
+  StatusCountDto,
   UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
@@ -17,6 +18,21 @@ export interface GetCasesParams {
   classificationId?: number;
   page?: number;
   pageSize?: number;
+}
+
+export interface SearchCasesParams {
+  busqueda?: string;
+  page?: number;
+  pageSize?: number;
+  ordenarPor?: string;
+  ordenDescendente?: boolean;
+  client?: string;
+  statusCaseDesc?: string;
+  technician?: string;
+  userRequester?: string;
+  idCaseClient?: number;
+  nombreCompleto?: string;
+  creationDate?: string;
 }
 
 export interface PagedDto<T> {
@@ -51,6 +67,10 @@ export interface ApiClient {
 
   /** Personas asignables (para el select "Asignar a" del modal de reasignación). */
   getMembers(department: string, jfg: string): Promise<MemberDto[]>;
+  /** Búsqueda de casos con filtros (GET /api/Case/filtrados). */
+  searchCases(params: SearchCasesParams): Promise<PagedDto<CaseDto>>;
+  /** Conteo de casos por estado (GET /api/Case/por-status-count). */
+  getStatusCounts(): Promise<StatusCountDto[]>;
   /** Subestados detallados (StatusCaseSubStatus: En desarrollo, En validación…). */
   getStatusCaseSubStatuses(): Promise<CatalogItemDto[]>;
   /** Actualiza/reasigna un caso (PUT). Devuelve el caso actualizado. */

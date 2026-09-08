@@ -163,6 +163,12 @@ export interface AuthTokensDto {
   user: AuthUserDto;
 }
 
+/** Conteo de casos por estado (GET /api/Case/por-status-count). */
+export interface StatusCountDto {
+  statusCaseDesc: string;
+  cantidadCasos: number;
+}
+
 export interface CatalogsDto {
   equipmentTypes: CatalogItemDto[];
   modules: CatalogItemDto[];

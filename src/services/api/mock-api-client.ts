@@ -9,12 +9,13 @@ import type {
   CreateCommentDto,
   LoginRequestDto,
   MemberDto,
+  StatusCountDto,
   UpdateCaseDto,
 } from '@/data/datasources/remote/dto';
 import type { FileToUpload } from '@/domain';
 import { generateSeed, type SeedData } from '@/mock';
 
-import type { ApiClient, GetCasesParams, PagedDto } from './api-client';
+import type { ApiClient, GetCasesParams, PagedDto, SearchCasesParams } from './api-client';
 import { ApiError } from './api-error';
 
 export interface MockApiClientOptions {
@@ -103,6 +104,36 @@ export class MockApiClient implements ApiClient {
           params.classificationId == null || c.ClassificationCaseId === params.classificationId,
       )
       .sort((a, b) => Date.parse(b.CreationDate) - Date.parse(a.CreationDate));
+    const start = (page - 1) * pageSize;
+    return {
+      items: filtered.slice(start, start + pageSize),
+      page,
+      pageSize,
+      total: filtered.length,
+    };
+  }
+
+  async searchCases(params: SearchCasesParams): Promise<PagedDto<CaseDto>> {
+    await this.delay();
+    const page = params.page ?? 1;
+    const pageSize = params.pageSize ?? 10;
+    const query = (params.busqueda ?? '').toLowerCase().trim();
+    const filtered = this.cases.filter((c) => {
+      if (!query) return true;
+      const searchable = [
+        c.CaseDetails,
+        c.Technician,
+        c.UserRequester,
+        c.Client,
+        c.StatusCaseDesc,
+        c.Location,
+        String(c.IdCaseClient),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchable.includes(query);
+    });
     const start = (page - 1) * pageSize;
     return {
       items: filtered.slice(start, start + pageSize),
@@ -215,6 +246,20 @@ export class MockApiClient implements ApiClient {
   async getCatalogs(): Promise<CatalogsDto> {
     await this.delay();
     return this.catalogs;
+  }
+
+  async getStatusCounts(): Promise<StatusCountDto[]> {
+    await this.delay();
+    // Conteo demo basado en los casos existentes.
+    const counts: Record<string, number> = {};
+    for (const c of this.cases) {
+      const desc = c.StatusCaseDesc ?? 'Desconocido';
+      counts[desc] = (counts[desc] ?? 0) + 1;
+    }
+    return Object.entries(counts).map(([statusCaseDesc, cantidadCasos]) => ({
+      statusCaseDesc,
+      cantidadCasos,
+    }));
   }
 
   async getMembers(): Promise<MemberDto[]> {

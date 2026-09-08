@@ -46,11 +46,11 @@ describe('helpers de dominio', () => {
   });
 
   describe('caseDisplayId', () => {
-    it('muestra el entero del servidor', () => {
-      expect(caseDisplayId({ serverId: 28 })).toBe('Caso #28');
+    it('muestra el idCaseClient del servidor', () => {
+      expect(caseDisplayId({ caseClientId: 28 })).toBe('Caso #28');
     });
-    it('muestra marcador cuando no hay serverId', () => {
-      expect(caseDisplayId({ serverId: null })).toBe('Caso (pendiente de número)');
+    it('muestra marcador cuando no hay caseClientId', () => {
+      expect(caseDisplayId({ caseClientId: null })).toBe('Caso (pendiente de número)');
     });
   });
 

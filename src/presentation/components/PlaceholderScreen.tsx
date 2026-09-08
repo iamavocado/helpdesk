@@ -17,6 +17,11 @@ export function PlaceholderScreen({ title }: { title: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+  root: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
   note: { marginTop: spacing.md },
 });

@@ -1,28 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { getContainer } from '@/core/di';
-import { isOk, type Case, type Classification } from '@/domain';
+import { isOk, type Case } from '@/domain';
 
 /** Filtros de la lista: los 3 grupos + "Resuelto" (estado detallado) + todos. */
 export type CaseFilter = 'todos' | 'pendiente' | 'cola' | 'resuelto' | 'cerrado';
 
-const PAGE_SIZE = 20;
-
-/** Traduce el chip de filtro a parámetros de consulta (clasificación o estado). */
-function filterToParams(f: CaseFilter): { classification?: Classification; statusCaseId?: number } {
-  switch (f) {
-    case 'pendiente':
-      return { classification: 'pendiente' };
-    case 'cola':
-      return { classification: 'cola' };
-    case 'resuelto':
-      return { statusCaseId: 3 }; // Resuelto
-    case 'cerrado':
-      return { statusCaseId: 4 }; // Cerrado (separado de Resuelto)
-    default:
-      return {};
-  }
-}
+const PAGE_SIZE = 10;
 
 interface CasesListData {
   items: Case[];
@@ -37,7 +21,7 @@ interface CasesListData {
   reload: () => Promise<void>;
 }
 
-/** Lista de casos paginada y filtrable por clasificación (offline-first). */
+/** Lista de casos paginada desde el servidor (10 por página). */
 export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData {
   const repo = getContainer().caseRepository;
   const [filter, setFilterState] = useState<CaseFilter>(initialFilter);
@@ -48,14 +32,13 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
   const [loadingMore, setLoadingMore] = useState(false);
 
   const fetchPage = useCallback(
-    async (targetPage: number, currentFilter: CaseFilter) => {
-      const result = await repo.list({
-        ...filterToParams(currentFilter),
+    async (targetPage: number, _currentFilter: CaseFilter) => {
+      const result = await repo.fetchFromApi({
         page: targetPage,
         pageSize: PAGE_SIZE,
       });
       if (!isOk(result)) return;
-      console.log('[DEBUG] useCasesList — items recibidos:', JSON.stringify(result.value.items.slice(0, 3), null, 2));
+      console.log('[DEBUG] useCasesList — items recibidos:', result.value.items.length);
       setTotal(result.value.total);
       setPage(targetPage);
       setItems((prev) =>
@@ -67,19 +50,13 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    await repo.refresh(true); // pull completo forzado
     await fetchPage(1, filter);
     setRefreshing(false);
-  }, [repo, fetchPage, filter]);
+  }, [fetchPage, filter]);
 
-  // Carga inicial y al cambiar el filtro: local primero (instantáneo), luego
-  // sincroniza en segundo plano y refresca.
+  // Carga inicial y al cambiar el filtro: solo lee de la BD local (sin descarga masiva).
   useEffect(() => {
-    void (async () => {
-      await fetchPage(1, filter);
-      await repo.refresh();
-      await fetchPage(1, filter);
-    })();
+    void fetchPage(1, filter);
   }, [repo, fetchPage, filter]);
 
   const setFilter = useCallback((next: CaseFilter) => {
@@ -99,9 +76,7 @@ export function useCasesList(initialFilter: CaseFilter = 'todos'): CasesListData
   // Recarga silenciosa (página 1 del filtro actual), p. ej. al enfocar la pantalla.
   const reload = useCallback(async () => {
     await fetchPage(1, filter);
-    await repo.refresh();
-    await fetchPage(1, filter);
-  }, [repo, fetchPage, filter]);
+  }, [fetchPage, filter]);
 
   return {
     items,

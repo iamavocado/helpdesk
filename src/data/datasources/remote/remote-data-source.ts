@@ -18,8 +18,9 @@ import type {
   NewCaseInput,
   NewCommentInput,
   ReassignInput,
+  StatusCount,
 } from '@/domain';
-import { ApiError, type ApiClient, type GetCasesParams } from '@/services/api';
+import { ApiError, type ApiClient, type GetCasesParams, type SearchCasesParams } from '@/services/api';
 
 import type { UpdateCaseDto } from './dto';
 import {
@@ -58,6 +59,8 @@ export function toDomainError(error: unknown): DomainError {
  */
 export interface RemoteDataSource {
   fetchCases(params: GetCasesParams): Promise<RemoteCasesPage>;
+  /** Búsqueda de casos con filtros (GET /api/Case/filtrados). */
+  fetchSearchCases(params: SearchCasesParams): Promise<RemoteCasesPage>;
   fetchCase(serverId: number): Promise<Case>;
   createCase(input: NewCaseInput): Promise<Case>;
   fetchComments(caseServerId: number, caseLocalId: string): Promise<Comment[]>;
@@ -66,6 +69,8 @@ export interface RemoteDataSource {
   fetchCountries(): Promise<CatalogItem[]>;
   fetchDepartments(idCountry: number): Promise<CatalogItem[]>;
   fetchMembers(department: string, jfg: string): Promise<Member[]>;
+  /** Conteo de casos por estado (GET /api/Case/por-status-count). */
+  fetchStatusCounts(): Promise<StatusCount[]>;
   fetchStatusCaseSubStatuses(): Promise<CatalogItem[]>;
   updateCase(current: Case, input: ReassignInput): Promise<Case>;
   updateCaseStatus(current: Case, statusCaseId: number, statusCaseDesc: string): Promise<Case>;
@@ -92,6 +97,22 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       };
     } catch (e) {
       logger.error('RemoteDataSource.fetchCases — error', { error: String(e) });
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchSearchCases(params: SearchCasesParams): Promise<RemoteCasesPage> {
+    logger.info('RemoteDataSource.fetchSearchCases', { busqueda: params.busqueda, page: params.page });
+    try {
+      const page = await this.api.searchCases(params);
+      return {
+        items: page.items.map(dtoToCase),
+        total: page.total,
+        page: page.page,
+        pageSize: page.pageSize,
+      };
+    } catch (e) {
+      logger.error('RemoteDataSource.fetchSearchCases — error', { error: String(e) });
       throw toDomainError(e);
     }
   }
@@ -178,6 +199,16 @@ export class ApiRemoteDataSource implements RemoteDataSource {
       }));
     } catch (e) {
       logger.error('RemoteDataSource.fetchDepartments — error', { idCountry, error: String(e) });
+      throw toDomainError(e);
+    }
+  }
+
+  async fetchStatusCounts(): Promise<StatusCount[]> {
+    logger.info('RemoteDataSource.fetchStatusCounts');
+    try {
+      return await this.api.getStatusCounts();
+    } catch (e) {
+      logger.error('RemoteDataSource.fetchStatusCounts — error', { error: String(e) });
       throw toDomainError(e);
     }
   }

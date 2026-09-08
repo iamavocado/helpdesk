@@ -116,7 +116,13 @@ export function caseTitle(
   return secondary ? `${c.equipmentTypeDesc} · ${secondary}` : c.equipmentTypeDesc;
 }
 
-/** Identificador legible: entero del servidor o marcador offline. */
-export function caseDisplayId(c: Pick<Case, 'serverId'>): string {
-  return c.serverId != null ? `Caso #${c.serverId}` : 'Caso (pendiente de número)';
+/** Identificador legible: entero visible para el cliente o marcador offline. */
+export function caseDisplayId(c: Pick<Case, 'caseClientId'>): string {
+  return c.caseClientId != null ? `Caso #${c.caseClientId}` : 'Caso (pendiente de número)';
+}
+
+/** Conteo de casos por estado (GET /api/Case/por-status-count). */
+export interface StatusCount {
+  statusCaseDesc: string;
+  cantidadCasos: number;
 }

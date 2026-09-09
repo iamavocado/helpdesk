@@ -1,5 +1,12 @@
 import type { DomainError } from '@/core/errors';
-import type { Case, CatalogItem, Member, NewCaseInput, ReassignInput, StatusCount } from '../entities';
+import type {
+  Case,
+  CatalogItem,
+  Member,
+  NewCaseInput,
+  ReassignInput,
+  StatusCount,
+} from '../entities';
 import type { Classification, Result } from '../value-objects';
 
 /** Opciones que necesita el modal "Reasignar Caso" (cargadas bajo demanda). */
@@ -67,7 +74,7 @@ export interface CaseRepository {
   ): Promise<Result<Case, DomainError>>;
 
   /** Carga las opciones del modal de reasignación (técnicos + subestados). */
-  getReassignOptions(): Promise<Result<ReassignOptions, DomainError>>;
+  getReassignOptions(department?: string): Promise<Result<ReassignOptions, DomainError>>;
 
   /** Reasigna un caso (técnico, estado, subestado, categoría, etc.) vía PUT. */
   reassign(id: string, input: ReassignInput): Promise<Result<Case, DomainError>>;

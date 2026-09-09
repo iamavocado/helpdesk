@@ -1,4 +1,5 @@
 import { DomainError, notFoundError, unknownError } from '@/core/errors';
+import { logger } from '@/core/logger';
 import { uuid } from '@/core/utils/id';
 import {
   classificationFromId,
@@ -66,12 +67,13 @@ export class CaseRepositoryImpl implements CaseRepository {
   }
 
   async create(input: NewCaseInput): Promise<Result<Case, DomainError>> {
-    console.log('[DEBUG] CaseRepositoryImpl.create — input:', JSON.stringify(input));
+    logger.debug('[DEBUG] CaseRepositoryImpl.create — input:', { input });
     const timestamp = this.now();
     const id = this.idGen();
     const newCase: Case = {
       id,
       serverId: null,
+      caseClientId: null,
       userRequester: input.userRequester ?? '',
       requesterEmail: input.emailRequester ?? null,
       reportingUser: null,
@@ -106,7 +108,7 @@ export class CaseRepositoryImpl implements CaseRepository {
     };
 
     try {
-      console.log('[DEBUG] CaseRepositoryImpl.create — guardando en local DB, id:', id);
+      logger.debug('[DEBUG] CaseRepositoryImpl.create — guardando en local DB, id:', { id });
       await this.local.putCase(newCase);
       const op: PendingOperation = {
         id: this.idGen(),
@@ -120,10 +122,10 @@ export class CaseRepositoryImpl implements CaseRepository {
         createdAt: timestamp,
       };
       await this.local.enqueue(op);
-      console.log('[DEBUG] CaseRepositoryImpl.create — OK, caso creado localmente:', id);
+      logger.debug('[DEBUG] CaseRepositoryImpl.create — OK, caso creado localmente:', { id });
       return ok(newCase);
     } catch (e) {
-      console.log('[DEBUG] CaseRepositoryImpl.create — ERROR:', String(e));
+      logger.debug('[DEBUG] CaseRepositoryImpl.create — ERROR:', { error: String(e) });
       return err(unknownError('No se pudo crear el caso', e));
     }
   }
@@ -177,10 +179,10 @@ export class CaseRepositoryImpl implements CaseRepository {
     }
   }
 
-  async getReassignOptions(): Promise<Result<ReassignOptions, DomainError>> {
+  async getReassignOptions(department?: string): Promise<Result<ReassignOptions, DomainError>> {
     try {
       const [members, statusSubStatuses] = await Promise.all([
-        this.remote.fetchMembers('HelpDesk', 'Soporte'),
+        this.remote.fetchMembers(department ?? 'HelpDesk', 'Soporte'),
         this.remote.fetchStatusCaseSubStatuses(),
       ]);
       return ok({ members, statusSubStatuses });
@@ -239,7 +241,9 @@ export class CaseRepositoryImpl implements CaseRepository {
     try {
       return ok(await this.remote.fetchRecentCases());
     } catch (e) {
-      return err(e instanceof DomainError ? e : unknownError('Error al obtener casos recientes', e));
+      return err(
+        e instanceof DomainError ? e : unknownError('Error al obtener casos recientes', e),
+      );
     }
   }
 

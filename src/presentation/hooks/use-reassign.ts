@@ -3,6 +3,8 @@ import { useCallback, useState } from 'react';
 import { getContainer } from '@/core/di';
 import { isOk, type CatalogItem, type Member, type ReassignInput, type Catalogs } from '@/domain';
 
+import { useAuthStore } from '@/presentation/stores';
+
 interface ReassignData {
   members: Member[];
   statusSubStatuses: CatalogItem[];
@@ -20,6 +22,7 @@ interface ReassignData {
 /** Carga las opciones y ejecuta la reasignación de un caso. */
 export function useReassign(): ReassignData {
   const { caseRepository, catalogRepository } = getContainer();
+  const departmentName = useAuthStore((s) => s.user?.departmentName ?? undefined);
   const [members, setMembers] = useState<Member[]>([]);
   const [statusSubStatuses, setStatusSubStatuses] = useState<CatalogItem[]>([]);
   const [catalogs, setCatalogs] = useState<Catalogs | null>(null);
@@ -31,7 +34,7 @@ export function useReassign(): ReassignData {
     setLoading(true);
     setError(null);
     const [optionsResult, catalogsResult] = await Promise.all([
-      caseRepository.getReassignOptions(),
+      caseRepository.getReassignOptions(departmentName),
       catalogRepository.getAll(),
     ]);
     if (isOk(optionsResult)) {
@@ -42,7 +45,7 @@ export function useReassign(): ReassignData {
     }
     if (isOk(catalogsResult)) setCatalogs(catalogsResult.value);
     setLoading(false);
-  }, [caseRepository, catalogRepository]);
+  }, [caseRepository, catalogRepository, departmentName]);
 
   const submit = useCallback(
     async (caseId: string, input: ReassignInput): Promise<boolean> => {

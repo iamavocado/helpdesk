@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Input, Text, colors, spacing } from '@/design-system';
 import type { Credentials } from '@/domain';
@@ -25,6 +26,7 @@ export interface LoginScreenProps {
  * envío a `onSubmit`. Sin acoplamiento a stores ni módulos nativos (testeable).
  */
 export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginScreenProps) {
+  const insets = useSafeAreaInsets();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +53,7 @@ export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginSc
         </Text>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { paddingBottom: spacing.screen + insets.bottom }]}>
         <Text variant="detailTitle" color={colors.brandDark} style={styles.title}>
           Iniciar sesión
         </Text>

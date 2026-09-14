@@ -3,6 +3,16 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { LoginScreen } from '@/presentation/screens/login';
 
 describe('LoginScreen', () => {
+  it('muestra la versión y la fecha al fondo de la tarjeta', () => {
+    const { getByText, getByTestId } = render(<LoginScreen onSubmit={jest.fn()} />);
+
+    expect(getByText('Versión 1.0')).toBeTruthy();
+    expect(getByText('14/09/2026')).toBeTruthy();
+    expect(getByTestId('login-version-footer').props.style).toEqual(
+      expect.objectContaining({ marginTop: 'auto' }),
+    );
+  });
+
   it('muestra error de validación y no envía si los campos están vacíos', () => {
     const onSubmit = jest.fn();
     const { getByText, queryByText } = render(<LoginScreen onSubmit={onSubmit} />);

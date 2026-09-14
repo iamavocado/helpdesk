@@ -110,6 +110,15 @@ export function LoginScreen({ onSubmit, loading = false, errorMessage }: LoginSc
           style={styles.submit}
         />
         {loading ? <ActivityIndicator color={colors.brandTeal} style={styles.spinner} /> : null}
+
+        <View testID="login-version-footer" style={styles.versionFooter}>
+          <Text variant="caption" color={colors.inkFaint}>
+            Versión 1.0
+          </Text>
+          <Text variant="caption" color={colors.inkFaint}>
+            14/09/2026
+          </Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -139,4 +148,5 @@ const styles = StyleSheet.create({
   toggle: { position: 'absolute', right: 12, top: 28 },
   submit: { marginTop: spacing.md },
   spinner: { marginTop: spacing['2xl'] },
+  versionFooter: { marginTop: 'auto', alignItems: 'center', paddingTop: spacing['2xl'] },
 });
